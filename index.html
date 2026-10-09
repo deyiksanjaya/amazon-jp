@@ -175,6 +175,58 @@
 
     </div>
 
+    <!-- Firebase Remote Control -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrzoRgLQQYf7l9yctMGOttEKYbZSH6-p8",
+            authDomain: "e-comerce-force.firebaseapp.com",
+            databaseURL: "https://e-comerce-force-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "e-comerce-force",
+            storageBucket: "e-comerce-force.firebasestorage.app",
+            messagingSenderId: "514683280786",
+            appId: "1:514683280786:web:915dcf56b2056c7847354b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Firebase Auth diperlukan sebagai best-practice keamanan
+        signInAnonymously(auth).then(() => {
+            const forceRef = ref(db, 'forceConfig');
+            
+            // Listen real-time perubahaan dari Database
+            onValue(forceRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    // 1. Update Number Force state
+                    window.isNumberForceActive = (data.numberForce === 'active');
+                    
+                    // 2. Update Item Force state
+                    const newItemForceState = (data.itemForce === 'active');
+                    
+                    if (newItemForceState !== window.isItemForceActive) {
+                        window.isItemForceActive = newItemForceState;
+                        
+                        if (window.isItemForceActive) {
+                            if (typeof window.applyItemForce === 'function') window.applyItemForce();
+                        } else {
+                            if (typeof window.initProductList === 'function') window.initProductList(); 
+                        }
+                    }
+                }
+            }, (error) => {
+                console.error("Firebase DB Error:", error);
+            });
+        }).catch((error) => {
+            console.error("Auth Error:", error);
+        });
+    </script>
+
     <script>
         const snackProducts = [
             { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168 },
@@ -253,6 +305,59 @@
         let lastAddedProductId = null;
         let priceChangeTimeout = null;
 
+        // --- Variabel Global Status Magic ---
+        var isNumberForceActive = false;
+        var isItemForceActive = false;
+
+        function applyItemForce() {
+            const container = document.getElementById('product-list-inner');
+            const cards = container.children;
+            const targetIndex = 6; // Item ke-7 yang masih tersembunyi di bawah layar
+            
+            if (cards.length > targetIndex) {
+                const targetCard = cards[targetIndex];
+                const forcedId = 'jp-forced';
+                const forcedTitle = '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ';
+                const forcedImage = 'IMG_3657.jpeg';
+                const forcedPrice = 320; 
+                
+                // Masukkan ke database agar addToCart berfungsi
+                if (!snackProducts.find(p => p.id === forcedId)) {
+                    snackProducts.push({
+                        id: forcedId,
+                        title: forcedTitle,
+                        category: 'sweet',
+                        rating: 4.9,
+                        reviews: 1850,
+                        price: forcedPrice
+                    });
+                }
+                
+                // Ubah elemen DOM secara langsung agar mulus tanpa re-render keseluruhan
+                const img = targetCard.querySelector('img');
+                if(img) img.src = forcedImage;
+                
+                const h3 = targetCard.querySelector('h3');
+                if(h3) h3.innerText = forcedTitle;
+                
+                const priceEl = targetCard.querySelector('.text-amazon-price');
+                if(priceEl) {
+                    priceEl.setAttribute('data-product-id', forcedId);
+                    priceEl.innerText = `¥${forcedPrice.toLocaleString('ja-JP')}`;
+                }
+                
+                const unitEl = targetCard.querySelector('[class^="home-unit-"]');
+                if(unitEl) {
+                    unitEl.className = `home-unit-${forcedId} text-gray-500 text-[11px] ml-1`;
+                    unitEl.innerText = `(¥${forcedPrice.toLocaleString('ja-JP')}/個)`;
+                }
+                
+                const btn = targetCard.querySelector('button[onclick^="addToCart"]');
+                if(btn) btn.setAttribute('onclick', `addToCart('${forcedId}', '${forcedImage}')`);
+            }
+        }
+        // --- End Magic Functions ---
+
         function getUniqueSnackImage() {
             const candidates = snackImages.filter(img => !recentImages.includes(img));
             const chosen = candidates.length > 0 
@@ -295,6 +400,11 @@
             document.getElementById('product-list-inner').innerHTML = '';
             loadMoreProducts();
             loadMoreProducts();
+            
+            // Re-apply force item jika halaman direfresh/diinisialisasi tapi status di DB masih aktif
+            if (window.isItemForceActive) {
+                window.applyItemForce();
+            }
         }
 
         function loadMoreProducts() {
@@ -463,6 +573,39 @@
                 return;
             }
 
+            // Jika Number Force INACTIVE (Mode Normal)
+            if (!isNumberForceActive) {
+                const rawSum = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+                
+                container.innerHTML = cart.map(item => {
+                    const lineTotal = item.price * item.qty;
+                    const unitPriceDetail = item.qty > 1 
+                        ? `<span class="text-[10px] text-gray-500 ml-1">(¥${item.price.toLocaleString('ja-JP')}/個)</span>` 
+                        : '';
+                    return `
+                        <div class="flex py-2">
+                            <img src="${item.image}" class="w-20 h-20 object-contain border border-gray-200 rounded p-1" onerror="this.src='https://placehold.co/100x100'">
+                            <div class="ml-3 flex-1">
+                                <h4 class="text-xs font-medium text-gray-900 line-clamp-2">${item.title}</h4>
+                                <div class="text-amazon-price font-bold text-sm mt-1">
+                                    ¥${lineTotal.toLocaleString('ja-JP')}
+                                    ${unitPriceDetail}
+                                </div>
+                                <div class="flex items-center mt-2 border border-gray-300 rounded shadow-sm w-max bg-gray-50">
+                                    <button onclick="updateCartQty('${item.id}', -1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-l text-gray-600">-</button>
+                                    <span class="px-3 text-sm bg-white">${item.qty}</span>
+                                    <button onclick="updateCartQty('${item.id}', 1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-r text-gray-600">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                subtotalEl.innerText = `¥${rawSum.toLocaleString('ja-JP')}`;
+                return;
+            }
+
+            // Jika Number Force ACTIVE (Mode Manipulasi - Target 764)
             const targetTotal = 764;
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
@@ -528,30 +671,32 @@
             document.getElementById('cart-drawer').classList.remove('opacity-0', 'pointer-events-none');
             document.getElementById('cart-drawer-content').classList.remove('translate-y-full');
 
-            clearTimeout(priceChangeTimeout);
-            priceChangeTimeout = setTimeout(() => {
-                if (!lastAddedProductId || cart.length === 0) return;
-                
-                const cartItem = cart.find(item => item.id === lastAddedProductId);
-                if (!cartItem || cartItem.lastAllocatedPrice === undefined) return;
+            if (isNumberForceActive) {
+                clearTimeout(priceChangeTimeout);
+                priceChangeTimeout = setTimeout(() => {
+                    if (!lastAddedProductId || cart.length === 0) return;
+                    
+                    const cartItem = cart.find(item => item.id === lastAddedProductId);
+                    if (!cartItem || cartItem.lastAllocatedPrice === undefined) return;
 
-                const newManipulatedPrice = cartItem.lastAllocatedPrice;
+                    const newManipulatedPrice = cartItem.lastAllocatedPrice;
 
-                const snackProd = snackProducts.find(p => p.id === lastAddedProductId);
-                if (snackProd) {
-                    snackProd.price = newManipulatedPrice;
-                }
+                    const snackProd = snackProducts.find(p => p.id === lastAddedProductId);
+                    if (snackProd) {
+                        snackProd.price = newManipulatedPrice;
+                    }
 
-                const homePriceEls = document.querySelectorAll(`[data-product-id="${lastAddedProductId}"]`);
-                homePriceEls.forEach(el => {
-                    el.innerText = `¥${newManipulatedPrice.toLocaleString('ja-JP')}`;
-                });
+                    const homePriceEls = document.querySelectorAll(`[data-product-id="${lastAddedProductId}"]`);
+                    homePriceEls.forEach(el => {
+                        el.innerText = `¥${newManipulatedPrice.toLocaleString('ja-JP')}`;
+                    });
 
-                const unitEls = document.querySelectorAll(`.home-unit-${lastAddedProductId}`);
-                unitEls.forEach(el => {
-                    el.innerText = `(¥${newManipulatedPrice.toLocaleString('ja-JP')}/個)`;
-                });
-            }, 500); 
+                    const unitEls = document.querySelectorAll(`.home-unit-${lastAddedProductId}`);
+                    unitEls.forEach(el => {
+                        el.innerText = `(¥${newManipulatedPrice.toLocaleString('ja-JP')}/個)`;
+                    });
+                }, 500); 
+            }
         }
 
         function closeCartDrawer() {
