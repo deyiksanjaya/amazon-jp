@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Remote Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 md:p-8 select-none">
+
+  <!-- Fullscreen Layout -->
+  <main class="flex-1 flex flex-col justify-between gap-4 w-full max-w-none h-full">
+    
+    <!-- Header & Status Text Only -->
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div>
+        <h1 class="text-base font-extrabold tracking-wider uppercase text-slate-200">Remote Control</h1>
+        <p class="text-xs text-slate-500 font-medium">Realtime Firebase</p>
+      </div>
+      
+      <!-- Connection Badge (Text Only) -->
+      <div id="statusBadge" class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+        <span id="statusText">CONNECTING...</span>
+      </div>
+    </div>
+
+    <!-- Master Toggle Button -->
+    <button id="btn-master" onclick="toggleMaster()" class="w-full py-4 px-6 rounded-2xl bg-slate-800 border-2 border-slate-700 text-white font-bold flex items-center justify-between shadow-lg hover:bg-slate-750 active:scale-[0.99] transition-all cursor-pointer">
+      <div class="text-left">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Master Switch</div>
+        <div id="label-masterAction" class="text-base font-extrabold text-white">Aktifkan Semua</div>
+      </div>
+      <span id="badge-master" class="text-xs font-black px-3 py-1.5 rounded-xl bg-slate-700 text-slate-300 tracking-wider">ALL INACTIVE</span>
+    </button>
+
+    <!-- Main Buttons Grid (Full Screen Coverage) -->
+    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+
+      <!-- BUTTON 1: NUMBER FORCE -->
+      <button id="btn-numberForce" onclick="toggleSwitch('numberForce')" class="w-full h-full min-h-[160px] p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex flex-col justify-between text-left transition-all duration-200 active:scale-[0.99] cursor-pointer shadow-lg hover:border-slate-600">
+        <div class="flex items-center justify-between w-full">
+          <span class="text-xs font-black tracking-widest uppercase text-slate-400">Control 01</span>
+          <div id="badge-numberForce" class="px-3 py-1.5 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all">
+            INACTIVE
+          </div>
+        </div>
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">NUMBER FORCE</h2>
+          <p id="sub-numberForce" class="text-xs text-slate-400 mt-1 font-semibold">Klik di mana saja untuk merubah</p>
+        </div>
+      </button>
+
+      <!-- BUTTON 2: ITEM FORCE -->
+      <button id="btn-itemForce" onclick="toggleSwitch('itemForce')" class="w-full h-full min-h-[160px] p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex flex-col justify-between text-left transition-all duration-200 active:scale-[0.99] cursor-pointer shadow-lg hover:border-slate-600">
+        <div class="flex items-center justify-between w-full">
+          <span class="text-xs font-black tracking-widest uppercase text-slate-400">Control 02</span>
+          <div id="badge-itemForce" class="px-3 py-1.5 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all">
+            INACTIVE
+          </div>
+        </div>
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">ITEM FORCE</h2>
+          <p id="sub-itemForce" class="text-xs text-slate-400 mt-1 font-semibold">Klik di mana saja untuk merubah</p>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- Status Toast Notification -->
+    <div id="toastMessage" class="text-center text-xs font-bold tracking-wider text-slate-400 min-h-[1.5rem] py-1 transition-opacity duration-300 opacity-0 uppercase">
+      Siap
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrzoRgLQQYf7l9yctMGOttEKYbZSH6-p8",
+      authDomain: "e-comerce-force.firebaseapp.com",
+      databaseURL: "https://e-comerce-force-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "e-comerce-force",
+      storageBucket: "e-comerce-force.firebasestorage.app",
+      messagingSenderId: "514683280786",
+      appId: "1:514683280786:web:915dcf56b2056c7847354b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const dbRef = ref(db, 'forceConfig');
+
+    let currentState = {
+      numberForce: 'inactive',
+      itemForce: 'inactive'
+    };
+
+    let toastTimeout;
+    function showToast(text) {
+      const el = document.getElementById('toastMessage');
+      el.textContent = text;
+      el.classList.remove('opacity-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        el.classList.add('opacity-0');
+      }, 2000);
+    }
+
+    function updateButtonUI(key, value) {
+      const isActive = value === 'active' || value === true;
+      
+      const btn = document.getElementById(`btn-${key}`);
+      const badge = document.getElementById(`badge-${key}`);
+      const sub = document.getElementById(`sub-${key}`);
+
+      if (isActive) {
+        btn.className = 'w-full h-full min-h-[160px] p-6 rounded-2xl bg-emerald-500 border-2 border-emerald-400 flex flex-col justify-between text-left transition-all duration-200 active:scale-[0.99] cursor-pointer shadow-xl shadow-emerald-950/30';
+        badge.className = 'px-3 py-1.5 rounded-xl text-xs font-black tracking-wider bg-white text-emerald-700 shadow-sm transition-all';
+        badge.textContent = 'ACTIVE';
+        if (sub) sub.className = 'text-xs text-emerald-100 mt-1 font-semibold';
+      } else {
+        btn.className = 'w-full h-full min-h-[160px] p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex flex-col justify-between text-left transition-all duration-200 active:scale-[0.99] cursor-pointer shadow-lg hover:border-slate-600';
+        badge.className = 'px-3 py-1.5 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all';
+        badge.textContent = 'INACTIVE';
+        if (sub) sub.className = 'text-xs text-slate-400 mt-1 font-semibold';
+      }
+
+      updateMasterUI();
+    }
+
+    function updateMasterUI() {
+      const isNumActive = currentState.numberForce === 'active' || currentState.numberForce === true;
+      const isItemActive = currentState.itemForce === 'active' || currentState.itemForce === true;
+
+      const badgeMaster = document.getElementById('badge-master');
+      const labelMaster = document.getElementById('label-masterAction');
+
+      if (isNumActive && isItemActive) {
+        badgeMaster.textContent = 'ALL ACTIVE';
+        badgeMaster.className = 'text-xs font-black px-3 py-1.5 rounded-xl bg-emerald-500 text-white tracking-wider';
+        labelMaster.textContent = 'Matikan Semua';
+      } else if (!isNumActive && !isItemActive) {
+        badgeMaster.textContent = 'ALL INACTIVE';
+        badgeMaster.className = 'text-xs font-black px-3 py-1.5 rounded-xl bg-slate-700 text-slate-400 tracking-wider';
+        labelMaster.textContent = 'Aktifkan Semua';
+      } else {
+        badgeMaster.textContent = 'PARSIAL';
+        badgeMaster.className = 'text-xs font-black px-3 py-1.5 rounded-xl bg-amber-500 text-slate-900 tracking-wider';
+        labelMaster.textContent = 'Aktifkan Semua';
+      }
+    }
+
+    window.toggleSwitch = async function(key) {
+      const currentVal = currentState[key];
+      const isActive = currentVal === 'active' || currentVal === true;
+      const nextValue = isActive ? 'inactive' : 'active';
+
+      const updates = {};
+      updates[key] = nextValue;
+      updates[`${key}_lastUpdated`] = new Date().toISOString();
+
+      try {
+        await update(dbRef, updates);
+        showToast(`${key === 'numberForce' ? 'Number Force' : 'Item Force'} -> ${nextValue.toUpperCase()}`);
+      } catch (err) {
+        console.error("Firebase update failed:", err);
+        showToast(`Gagal memperbarui database`);
+      }
+    };
+
+    window.toggleMaster = async function() {
+      const isNumActive = currentState.numberForce === 'active' || currentState.numberForce === true;
+      const isItemActive = currentState.itemForce === 'active' || currentState.itemForce === true;
+
+      const nextValue = (isNumActive && isItemActive) ? 'inactive' : 'active';
+
+      const updates = {
+        numberForce: nextValue,
+        itemForce: nextValue,
+        master_lastUpdated: new Date().toISOString()
+      };
+
+      try {
+        await update(dbRef, updates);
+        showToast(`Semua tombol diubah ke ${nextValue.toUpperCase()}`);
+      } catch (err) {
+        console.error("Firebase master update failed:", err);
+        showToast(`Gagal memperbarui status master`);
+      }
+    };
+
+    function init() {
+      signInAnonymously(auth).catch(() => {});
+
+      const connectedRef = ref(db, ".info/connected");
+      onValue(connectedRef, (snap) => {
+        const badge = document.getElementById('statusBadge');
+        const text = document.getElementById('statusText');
+
+        if (snap.val() === true) {
+          badge.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+          text.textContent = 'TERHUBUNG';
+        } else {
+          badge.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20';
+          text.textContent = 'TERPUTUS';
+        }
+      });
+
+      onValue(dbRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        currentState.numberForce = data.numberForce || 'inactive';
+        currentState.itemForce = data.itemForce || 'inactive';
+
+        updateButtonUI('numberForce', currentState.numberForce);
+        updateButtonUI('itemForce', currentState.itemForce);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
