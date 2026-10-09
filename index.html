@@ -2,12 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Amazon Japan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
             theme: {
@@ -16,44 +15,34 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                        },
                         amazon: {
-                            teal: '#a2e8dd',
-                            darkTeal: '#008296',
-                            yellow: '#f3a847',
-                            orange: '#e47911',
-                            lightBg: '#f7f8f8'
+                            dark: '#232f3e',       // Main header background
+                            light: '#37475a',      // Lighter header background
+                            orange: '#febd69',     // Search button color
+                            yellow: '#ffd814',     // Add to cart button color
+                            link: '#007185',       // Links / Ratings color
+                            price: '#cc0c39'       // Red price color
                         }
                     }
                 }
             }
         }
     </script>
-
     <style>
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            width: 0px;
+            height: 0px;
+            background: transparent;
         }
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -66,263 +55,218 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 antialiased min-h-[100dvh] flex justify-center items-start">
+<body class="bg-gray-200 font-sans text-gray-900 antialiased min-h-screen flex justify-center items-start sm:py-6">
 
-    <!-- Main Device Wrapper: Full height, constrained width on desktop, edge-to-edge on mobile -->
-    <div class="w-full sm:max-w-md bg-white h-[100dvh] flex flex-col relative overflow-hidden sm:border-x border-gray-300 shadow-2xl">
+    <div class="w-full max-w-md bg-white h-screen sm:h-[844px] sm:max-h-[920px] sm:rounded-3xl sm:shadow-2xl flex flex-col relative overflow-hidden border-gray-200 sm:border">
         
-        <!-- Fixed Header Area (Search Bar + Category Bar) -->
-        <div class="flex-none z-20 bg-white shadow-xs">
-            <!-- Top App Header / Search Bar Bar (Includes safe-area-inset-top for iOS notches/dynamic island) -->
-            <div class="bg-gradient-to-r from-[#b3f3e6] via-[#a6edd8] to-[#92e2d4] px-3 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2.5 flex items-center space-x-2 shadow-sm">
-                <!-- Back Button -->
-                <button onclick="resetSearch()" class="p-1.5 text-gray-800 hover:bg-black/5 rounded-full transition" title="戻る">
-                    <i class="fa-solid fa-arrow-left text-lg"></i>
-                </button>
+        <!-- Fixed Header Area -->
+        <div class="flex-none z-20 shadow-sm relative">
+            
+            <div class="bg-amazon-dark px-3 py-2 flex flex-col">
+                
+                <!-- Top Row: Menu, Logo, Profile, Cart -->
+                <div class="flex items-center justify-between pb-2">
+                    <!-- Left Side: Burger Menu + Logo -->
+                    <div class="flex items-center space-x-2">
+                        <button class="text-white p-1 hover:text-gray-300 transition flex items-center justify-center">
+                            <i class="fa-solid fa-bars text-2xl"></i>
+                        </button>
+                        <div class="flex flex-col pt-1">
+                            <div class="text-white text-lg font-bold leading-none tracking-tighter flex items-center">
+                                amazon<span class="text-sm font-normal">.co.jp</span>
+                            </div>
+                            <div class="text-blue-300 text-[10px] font-bold italic leading-none flex items-center -mt-0.5">
+                                prime <i class="fa-solid fa-check text-[8px] ml-0.5"></i>
+                            </div>
+                        </div>
+                    </div>
 
-                <!-- Search Input Wrapper -->
-                <div class="flex-1 bg-white rounded-lg px-3 py-1.5 flex items-center shadow-inner border border-gray-300">
-                    <i class="fa-solid fa-magnifying-glass text-gray-500 text-base mr-2"></i>
+                    <!-- Right Side: Profile + Cart -->
+                    <div class="flex items-center space-x-4 pr-1">
+                        <button class="text-white hover:text-gray-300 flex items-center justify-center">
+                            <div class="flex flex-col items-center">
+                                <i class="fa-solid fa-user text-xl"></i>
+                            </div>
+                        </button>
+                        <button onclick="openCartDrawer()" class="text-white hover:text-gray-300 relative flex items-center justify-center pt-1">
+                            <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                            <span id="cart-badge" class="absolute -top-1 right-0 text-amazon-orange font-bold text-sm bg-amazon-dark px-1 rounded-full">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Input Row -->
+                <div class="flex bg-white rounded overflow-hidden shadow-inner h-10 mt-1">
                     <input 
                         type="text" 
                         id="search-input" 
-                        value="スナック" 
-                        placeholder="スナック・お菓子を検索..." 
-                        class="w-full bg-transparent border-none outline-none text-sm font-medium text-gray-900 placeholder-gray-400"
+                        value="snack" 
+                        class="flex-1 bg-transparent border-none outline-none text-base text-gray-900 px-3 py-2"
                         oninput="handleSearch(this.value)"
                     >
-                    <!-- Clear Button -->
-                    <button id="clear-search" onclick="clearSearch()" class="text-gray-400 hover:text-gray-600 mr-2 text-xs">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <!-- Visual Search Lens Icon -->
-                    <button class="text-gray-500 hover:text-gray-700 px-1 text-sm mr-1.5" title="カメラ検索">
-                        <i class="fa-regular fa-square-plus text-base"></i>
-                    </button>
-                    <!-- Voice Search Icon -->
-                    <button class="text-gray-500 hover:text-gray-700 text-sm" title="音声検索">
-                        <i class="fa-solid fa-microphone text-base"></i>
+                    <button class="w-12 bg-amazon-orange flex items-center justify-center text-gray-800 hover:bg-yellow-500 transition">
+                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- Quick Category Bar -->
-            <div class="bg-white border-b border-gray-200 px-3 py-2 flex space-x-2 overflow-x-auto no-scrollbar scroll-smooth text-xs">
-                <button onclick="filterCategory('all', this)" class="cat-btn bg-gray-900 text-white px-3 py-1.5 rounded-full font-medium whitespace-nowrap shadow-xs">すべて</button>
-                <button onclick="filterCategory('chips', this)" class="cat-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium whitespace-nowrap">ポテトチップス</button>
-                <button onclick="filterCategory('sweet', this)" class="cat-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium whitespace-nowrap">チョコ・甘味</button>
-                <button onclick="filterCategory('senbei', this)" class="cat-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium whitespace-nowrap">せんべい・米菓</button>
-                <button onclick="filterCategory('savory', this)" class="cat-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium whitespace-nowrap">おつまみ・珍味</button>
-                <button onclick="filterCategory('gummy', this)" class="cat-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-full font-medium whitespace-nowrap">グミ・キャンディ</button>
+            <div class="bg-white border-b border-gray-200 px-2 py-2 flex space-x-2 overflow-x-auto no-scrollbar scroll-smooth">
+                <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
+                    <i class="fa-solid fa-sliders mr-1.5"></i> フィルター
+                </button>
+                <button class="flex items-center border border-gray-400 bg-white px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
+                    <span class="text-blue-500 font-bold italic mr-1">prime</span> 
+                    <i class="fa-solid fa-toggle-on text-blue-500 text-sm"></i>
+                </button>
+                <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
+                    <div class="flex text-amazon-orange text-[10px] mr-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div> 
+                    以上
+                </button>
+                <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
+                    本日のタイムセール
+                </button>
+                <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
+                    人気 <i class="fa-solid fa-chevron-down text-[10px] ml-1 text-gray-500"></i>
+                </button>
             </div>
         </div>
 
-        <!-- Infinite Scrollable Product List Container -->
-        <div class="flex-1 overflow-y-auto bg-white divide-y divide-gray-100" id="product-container" onscroll="handleInfiniteScroll(this)">
-            <!-- Product items rendered dynamically via JS -->
-            <div id="product-list-inner" class="divide-y divide-gray-100 pb-4"></div>
-        </div>
-
-        <!-- Empty Search State Container -->
-        <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-3 text-gray-400">
-                <i class="fa-solid fa-cookie-bite text-3xl"></i>
+        <div class="flex-1 overflow-y-auto bg-white" id="product-container" onscroll="handleInfiniteScroll(this)">
+            
+            <!-- Result Info Banner -->
+            <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                <p class="text-sm text-gray-800 font-medium">すべてのカテゴリーから検索結果を表示しています</p>
             </div>
-            <h3 class="font-semibold text-gray-800 text-base">お菓子が見つかりませんでした</h3>
-            <p class="text-xs text-gray-500 mt-1">「ポテト」、「チョコ」、「抹茶」などのキーワードをお試しください。</p>
-            <button onclick="resetSearch()" class="mt-4 bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs px-4 py-2 rounded-lg font-medium shadow-sm transition">すべてのスナックを表示</button>
+
+            <!-- Product Items List -->
+            <div id="product-list-inner" class="divide-y divide-gray-200 border-t border-gray-200"></div>
         </div>
 
-        <!-- Fixed Bottom Navigation Bar (Includes safe-area-inset-bottom for iOS address bar/home indicator) -->
-        <div class="flex-none bg-white border-t border-gray-200 flex justify-around items-center pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] px-1 z-20">
-            <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-amazon-darkTeal font-medium text-[10px] w-1/4 py-1">
-                <i class="fa-solid fa-house text-xl mb-0.5"></i>
-                <span>ホーム</span>
-            </button>
-            <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center text-gray-500 hover:text-gray-800 text-[10px] w-1/4 py-1">
-                <i class="fa-regular fa-user text-xl mb-0.5"></i>
-                <span>マイページ</span>
-            </button>
-            <button onclick="openCartDrawer()" id="nav-cart" class="flex flex-col items-center text-gray-500 hover:text-gray-800 text-[10px] w-1/4 py-1 relative">
-                <div class="relative">
-                    <i class="fa-solid fa-cart-shopping text-xl mb-0.5"></i>
-                    <span id="cart-badge" class="hidden absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">0</span>
-                </div>
-                <span>カート</span>
-            </button>
-            <button onclick="switchTab('menu')" id="nav-menu" class="flex flex-col items-center text-gray-500 hover:text-gray-800 text-[10px] w-1/4 py-1">
-                <i class="fa-solid fa-bars text-xl mb-0.5"></i>
-                <span>メニュー</span>
-            </button>
-        </div>
-
-        <!-- Product Detail Drawer Modal -->
-        <div id="product-modal" class="fixed inset-0 bg-black/50 z-50 flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
-            <div id="product-modal-content" class="bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] transform translate-y-full transition-transform duration-300">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded" id="modal-category">プレミアムスナック</span>
-                    <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                
-                <div class="flex justify-center py-2">
-                    <img id="modal-image" src="" alt="スナック詳細" class="h-48 object-contain rounded-lg">
-                </div>
-
-                <h2 id="modal-title" class="font-bold text-gray-900 text-base leading-snug mt-2"></h2>
-                
-                <div class="flex items-center space-x-2 mt-1">
-                    <div class="flex text-amber-400 text-xs" id="modal-stars"></div>
-                    <span id="modal-rating" class="text-xs text-blue-600 font-medium"></span>
-                </div>
-
-                <div class="my-3 flex items-baseline space-x-2">
-                    <span id="modal-price" class="text-2xl font-bold text-gray-900"></span>
-                    <span class="text-xs text-green-600 font-semibold" id="modal-delivery">本日お届け可能</span>
-                </div>
-
-                <p id="modal-desc" class="text-xs text-gray-600 leading-relaxed border-t border-b border-gray-100 py-3 my-2"></p>
-
-                <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center border border-gray-300 rounded-lg">
-                        <button onclick="adjustModalQty(-1)" class="px-3 py-1 text-gray-600 hover:bg-gray-100 font-bold">-</button>
-                        <span id="modal-qty" class="px-3 py-1 font-semibold text-sm">1</span>
-                        <button onclick="adjustModalQty(1)" class="px-3 py-1 text-gray-600 hover:bg-gray-100 font-bold">+</button>
-                    </div>
-                    <button id="modal-add-btn" onclick="addModalItemToCart()" class="flex-1 ml-3 bg-amber-400 hover:bg-amber-500 text-gray-900 font-semibold py-2.5 px-4 rounded-xl text-sm shadow flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        <span>カートに追加する</span>
-                    </button>
-                </div>
-            </div>
+        <!-- Empty Search State -->
+        <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center bg-white z-10 absolute inset-y-32 inset-x-0">
+            <i class="fa-solid fa-magnifying-glass text-4xl text-gray-300 mb-3"></i>
+            <h3 class="font-semibold text-gray-800 text-base">商品が見つかりませんでした</h3>
+            <button onclick="resetSearch()" class="mt-4 border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition">すべての商品を表示</button>
         </div>
 
         <!-- Shopping Cart Drawer -->
         <div id="cart-drawer" class="fixed inset-0 bg-black/50 z-50 flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
-            <div id="cart-drawer-content" class="bg-white rounded-t-2xl h-[85dvh] flex flex-col transform translate-y-full transition-transform duration-300">
+            <div id="cart-drawer-content" class="bg-white rounded-t-2xl max-h-[85vh] h-[80vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                     <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-bag-shopping text-amazon-darkTeal text-lg"></i>
-                        <h3 class="font-bold text-gray-800 text-base">ショッピングカート</h3>
+                        <i class="fa-solid fa-cart-shopping text-amazon-dark text-lg"></i>
+                        <h3 class="font-bold text-gray-800 text-base">カート</h3>
                     </div>
                     <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-300">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <!-- Cart Items List -->
-                <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 space-y-3 divide-y divide-gray-100">
-                    <!-- Cart items rendered dynamically -->
-                </div>
+                <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 space-y-4 divide-y divide-gray-100"></div>
 
-                <!-- Cart Footer Summary (safe-area padding applied here too) -->
-                <div class="p-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-gray-200 bg-white space-y-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-gray-500">小計</span>
-                        <span id="cart-subtotal" class="font-bold text-gray-900 text-base">¥0</span>
+                <div class="p-4 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                    <div class="flex justify-between items-center text-sm mb-3">
+                        <span class="text-gray-800">小計</span>
+                        <span id="cart-subtotal" class="font-bold text-red-700 text-lg">¥0</span>
                     </div>
-                    <div class="flex justify-between items-center text-xs text-gray-500">
-                        <span>配送料 (全国一律)</span>
-                        <span class="text-green-600 font-semibold">無料</span>
-                    </div>
-                    <button onclick="checkout()" class="w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold py-3 rounded-xl shadow text-sm transition flex items-center justify-center space-x-2">
-                        <span>レジに進む</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <button onclick="checkout()" class="w-full bg-amazon-yellow hover:bg-yellow-400 text-gray-900 font-medium py-3 rounded-full shadow text-sm transition flex items-center justify-center">
+                        レジに進む
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="fixed top-[calc(4rem+env(safe-area-inset-top))] left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg z-50 flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 whitespace-nowrap">
-            <i class="fa-solid fa-circle-check text-green-400 text-sm" id="toast-icon"></i>
-            <span id="toast-message">商品をカートに追加しました</span>
+        <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded shadow-lg z-50 flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300">
+            <i class="fa-solid fa-check text-green-400"></i>
+            <span id="toast-message">カートに追加しました</span>
         </div>
 
     </div>
 
     <script>
-        // Extensive Japanese Snack Product Dataset (52 Items with price in 100-500 Yen range)
         const snackProducts = [
-            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: 'じゃがいも本来の美味しさを引き立てる、すっきりとした味わいのうすしお味ポテトチップス。' },
-            { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=400&q=80', description: '濃厚な宇治抹茶チョコレートを贅沢にコーティングしたプレミアムプレッツェル。' },
-            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 198, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: 'ココアクッキーとプレーンビスケットのザクザク食感が大人気のチョコバー。' },
-            { id: 'jp-4', title: '亀田製菓 柿の種 ピーナッツ入り 6袋ファミリーパック', category: 'senbei', rating: 4.8, reviews: 2150, price: 348, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '香ばしい醤油味のあられと香ばしいピーナッツの絶妙なゴールデンバランス。' },
-            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 220, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: 'サクサクのクッキーを味わい深いまろやかミルクチョコで包んだロングセラー菓子。' },
-            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 185, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=400&q=80', description: 'カリッとしたクラッカーと2層のコク深いミルクチョコレートの定番コンビ。' },
-            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 178, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1600952841320-db92ec4047ca?auto=format&fit=crop&w=400&q=80', description: '「食べだしたらキリンがない」独自の製法でカリカリ・サクサクの食感。' },
-            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 148, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: '可愛いコアラの絵柄がプリントされたサクサクビスケットの中にチョコがたっぷり。' },
-            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 128, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: '香ばしい全粒粉ビスケットと帆船デザインの上質なチョコレートの贅沢な組み合わせ。' },
-            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 158, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: '青のりとあおさの風味に唐辛子の隠し味がきいた元祖のり塩味。' },
-            { id: 'jp-11', title: 'おやつカンパニー ベビースターラーメン チキン味 6袋入', category: 'savory', rating: 4.7, reviews: 1240, price: 280, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80', description: 'チキンの旨味がたっぷり染み込んだラーメン風味のおつまみスナック。' },
-            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 148, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '「やめられない、とまらない」天然えびの豊かな香ばしさと適度な塩味。' },
-            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 220, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '青のりの香ばしさとまろやかな醤油のうま味が広がるボリボリ煎餅。' },
-            { id: 'jp-14', title: 'ブルボン ルマンド 抹茶＆ココア 詰合せ 12本', category: 'sweet', rating: 4.7, reviews: 1430, price: 380, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=400&q=80', description: '幾重にも重ねたサクサクの薄いクレープ生地を抹茶とココアで包みました。' },
-            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 135, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: '9種類の野菜とポテトのやさしい美味しさがつまったスナック菓子。' },
-            { id: 'jp-16', title: 'グリコ プリッツ トマト味 9袋入りファミリーパック', category: 'savory', rating: 4.7, reviews: 1120, price: 320, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=400&q=80', description: '完熟トマトの豊かな風味とオリーブオイルのコクが引き立つ細焼きプレッツェル。' },
-            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 198, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '甘じょっぱいハッピーパウダーがクセになる！とまらない美味しさ。' },
-            { id: 'jp-18', title: '湖池屋 黒トリュフ＆極み塩 ポテトチップス 50g', category: 'chips', rating: 4.8, reviews: 670, price: 260, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1600952841320-db92ec4047ca?auto=format&fit=crop&w=400&q=80', description: '芳醇な黒トリュフの香りと岩塩のコクをまとわせた極上の大人のポテトチップス。' },
-            { id: 'jp-19', title: 'ネスレ キットカット ミニ 抹茶味 12枚入りパック', category: 'sweet', rating: 4.8, reviews: 2300, price: 398, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=400&q=80', description: '本格的な宇治抹茶の苦みと甘みが楽しめる特製キットカット。' },
-            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 198, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: '果実そのものを食べているかのような新食感のジューシーな巨峰グミ。' },
-            { id: 'jp-21', title: 'カルビー Jagabee 薄塩バター味 5袋入り', category: 'chips', rating: 4.8, reviews: 1890, price: 340, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=400&q=80', description: '皮つきポテトそのままの風味が味わえるサクッホクッなスティック。' },
-            { id: 'jp-22', title: 'でん六 豆菓子 味のこだわり 120g おつまみパック', category: 'savory', rating: 4.6, reviews: 780, price: 298, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80', description: '海苔巻き、あられ、ピーナッツなどバラエティ豊かな香ばしい豆菓子アソート。' },
-            { id: 'jp-23', title: '明治 果汁グミ ぶどう 51g 1袋', category: 'gummy', rating: 4.9, reviews: 3100, price: 168, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: '果汁100%（生果汁換算）の着色料不使用、濃厚果汁のジューシーグミ。' },
-            { id: 'jp-24', title: '不二家 ホームパイ 発酵バター 30枚入り大容量', category: 'sweet', rating: 4.7, reviews: 1450, price: 320, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: '富士山麓の天然水で仕込んだ、サクサク贅沢な700層の極上パイ。' },
-            { id: 'jp-25', title: 'ぼんち ぼんち揚 あげせんべい 120g', category: 'senbei', rating: 4.8, reviews: 1670, price: 188, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: 'カリッと香ばしく揚げた薄口醤油仕立ての関西定番揚げせんべい。' },
-            { id: 'jp-26', title: '岩塚製菓 黒豆せんべい 醤油味 10枚', category: 'senbei', rating: 4.7, reviews: 890, price: 210, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '黒大豆がごろごろ入った、香ばしく歯ごたえのある本物志向の煎餅。' },
-            { id: 'jp-27', title: 'カルビー ピザポテト 濃厚チーズ味 63g 1袋', category: 'chips', rating: 4.9, reviews: 3400, price: 198, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1600952841320-db92ec4047ca?auto=format&fit=crop&w=400&q=80', description: '厚切り波型チップスにトロ～リ濃厚なダブルチーズがとろけた人気作。' },
-            { id: 'jp-28', title: 'カンロ ピュレグミ レモン 56g 1袋', category: 'gummy', rating: 4.8, reviews: 2100, price: 158, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: 'すっぱいパウダーと果肉の果汁感がクセになるハート型のレモングミ。' },
-            { id: 'jp-29', title: '明治 アポロ 苺チョコ 46g 1箱', category: 'sweet', rating: 4.8, reviews: 2900, price: 180, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: 'いちごチョコとミルクチョコの組み合わせがかわいい三角のチョコレート。' },
-            { id: 'jp-30', title: '越後製菓 ふんわり名人 きなこ餅 85g', category: 'senbei', rating: 4.9, reviews: 2750, price: 240, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '口の中でふわっととける口どけと国産最高級きなこの上品な甘さ。' },
-            { id: 'jp-31', title: '湖池屋 すっぱムーチョ さっぱり梅味 55g', category: 'chips', rating: 4.6, reviews: 1100, price: 140, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: '紀州産の梅を使用した、すっぱくて旨み豊かなさわやかスナック。' },
-            { id: 'jp-32', title: 'おやつカンパニー ブタメン とんこつ味 5個パック', category: 'savory', rating: 4.7, reviews: 1980, price: 450, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80', description: 'こってり旨いミニカップラーメン！おやつや夜食にピッタリ。' },
-            { id: 'jp-33', title: 'グリコ ビスコ 発酵バター仕立て 15枚入り', category: 'sweet', rating: 4.8, reviews: 1800, price: 160, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: '乳酸菌10億個配合！発酵バターの豊かな香りとクリームの美味しさ。' },
-            { id: 'jp-34', title: 'カルビー 堅あげポテト ブラックペッパー味 65g', category: 'chips', rating: 4.9, reviews: 4200, price: 170, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1600952841320-db92ec4047ca?auto=format&fit=crop&w=400&q=80', description: '噛むほどに旨みが広がる釜揚げ製法。ピリッと辛い黒胡椒の味わい。' },
-            { id: 'jp-35', title: 'サンリツ 源氏パイ 28枚入り お徳用', category: 'sweet', rating: 4.7, reviews: 1250, price: 340, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: 'ハートの形が可愛い、厳選した素材で作られた甘く香ばしいサクサクパイ。' },
-            { id: 'jp-36', title: 'なとり 茎わかめ 梅味 おつまみパック 116g', category: 'savory', rating: 4.6, reviews: 840, price: 420, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80', description: 'シャキシャキ食感のわかめ茎を紀州産南高梅のさっぱり塩味で仕上げました。' },
-            { id: 'jp-37', title: '湖池屋 カラムーチョ ホットチリ味 55g 1袋', category: 'chips', rating: 4.8, reviews: 2600, price: 168, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: '元祖辛旨ポテトスナック！チリの辛さと肉の旨みがクセになる刺激。' },
-            { id: 'jp-38', title: 'ノーベル 男梅キャンデー 80g 濃厚梅肉エキス', category: 'gummy', rating: 4.8, reviews: 1720, price: 210, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: '梅干し本来のしょっぱさと濃厚な旨みが一粒に凝縮された本格飴。' },
-            { id: 'jp-39', title: 'ロッテ パイの実 チョコパイ 73g 1箱', category: 'sweet', rating: 4.9, reviews: 3600, price: 210, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: 'サクサク64層のパイ生地にマイルドなまろやかチョコがぎっしり。' },
-            { id: 'jp-40', title: '天乃屋 歌舞伎揚 揚げせんべい 11枚パック', category: 'senbei', rating: 4.8, reviews: 2400, price: 210, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '香ばしく揚げた歌舞伎家紋入り生地に濃厚特製タレを染み込ませました。' },
-            { id: 'jp-41', title: 'カルビー フルグラ 500g プレミアムフルーツグラノーラ', category: 'chips', rating: 4.9, reviews: 6200, price: 498, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=400&q=80', description: 'オーツ麦やライ麦に香ばしく焼き上げた穀物と甘酸っぱいドライフルーツ。' },
-            { id: 'jp-42', title: 'ヤマザキビスケット チップスター うすしお味 S 50g', category: 'chips', rating: 4.7, reviews: 1400, price: 120, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80', description: '成型ポテトチップスのパイオニア。パリッと軽い食感が特徴のロングセラー。' },
-            { id: 'jp-43', title: '森永製菓 ハイチュウ アソート 86g 4つの果実味', category: 'gummy', rating: 4.8, reviews: 1950, price: 230, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: 'ジューシーでやわらかな噛みごたえ。ストロベリー、グリーンアップル等4種。' },
-            { id: 'jp-44', title: '三幸製菓 雪の宿 20枚入り 甘塩せんべい', category: 'senbei', rating: 4.8, reviews: 1820, price: 198, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: 'ソフトに焼き上げた煎餅に北海道産生クリーム使用のみつを塗りました。' },
-            { id: 'jp-45', title: '森永製菓 チョコボール ピーナッツ 1箱', category: 'sweet', rating: 4.7, reviews: 2200, price: 180, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: 'サクッとしたクリスプ層と香ばしいピーナッツのダブルの食感。' },
-            { id: 'jp-46', title: '扇雀飴本舗 はちみつ100%のキャンデー 51g', category: 'gummy', rating: 4.6, reviews: 750, price: 220, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: '原材料はちみつだけの純粋濃厚キャンディ。やさしい甘み。' },
-            { id: 'jp-47', title: '江崎グリコ カプリコミニ アソート 10本パック', category: 'sweet', rating: 4.8, reviews: 1320, price: 340, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: 'ふんわりエアチョコと香ばしいコーン。チョコ、いちご、バニラ味。' },
-            { id: 'jp-48', title: 'カバヤ ジューシーグミ パイン＆マンゴー 50g', category: 'gummy', rating: 4.5, reviews: 620, price: 140, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1582176647444-33230dd60718?auto=format&fit=crop&w=400&q=80', description: 'トロピカルなトロッとしたフルーツ果汁があふれる夏色グミ。' },
-            { id: 'jp-49', title: 'ブルボン エブリバーガー 66g ミニハンバーガー型', category: 'sweet', rating: 4.7, reviews: 980, price: 160, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=400&q=80', description: '見た目も楽しいハンバーガーの形をしたチョコレートビスケット。' },
-            { id: 'jp-50', title: 'グリコ ジャイアントコーン チョコナッツ 1個', category: 'sweet', rating: 4.9, reviews: 2900, price: 180, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=400&q=80', description: '香ばしいナッツとチョコレート、ザクザクコーンの贅沢コンビ。' },
-            { id: 'jp-51', title: '明治 きのこの山 抹茶ラテ味 期間限定', category: 'sweet', rating: 4.8, reviews: 1150, price: 210, delivery: '明日中にお届け', image: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=400&q=80', description: 'まろやかで香り高い抹茶ラテフレーバーの期間限定きのこの山。' },
-            { id: 'jp-52', title: '井村屋 ようかん 和菓子 詰合せ 5種パック', category: 'senbei', rating: 4.8, reviews: 1420, price: 480, delivery: '本日中にお届け', image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?auto=format&fit=crop&w=400&q=80', description: '伝統の練り羊羹、抹茶羊羹、栗羊羹など一口サイズの上品な和菓子。' }
+            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168 },
+            { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298 },
+            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 198 },
+            { id: 'jp-4', title: '亀田製菓 柿の種 ピーナッツ入り 6袋ファミリーパック', category: 'senbei', rating: 4.8, reviews: 2150, price: 348 },
+            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 220 },
+            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 185 },
+            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 178 },
+            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 148 },
+            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 128 },
+            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 158 },
+            { id: 'jp-11', title: 'おやつカンパニー ベビースターラーメン チキン味 6袋入', category: 'savory', rating: 4.7, reviews: 1240, price: 280 },
+            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 148 },
+            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 220 },
+            { id: 'jp-14', title: 'ブルボン ルマンド 抹茶＆ココア 詰合せ 12本', category: 'sweet', rating: 4.7, reviews: 1430, price: 380 },
+            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 135 },
+            { id: 'jp-16', title: 'グリコ プリッツ トマト味 9袋入りファミリーパック', category: 'savory', rating: 4.7, reviews: 1120, price: 320 },
+            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 198 },
+            { id: 'jp-18', title: '湖池屋 黒トリュフ＆極み塩 ポテトチップス 50g', category: 'chips', rating: 4.8, reviews: 670, price: 260 },
+            { id: 'jp-19', title: 'ネスレ キットカット ミニ 抹茶味 12枚入りパック', category: 'sweet', rating: 4.8, reviews: 2300, price: 398 },
+            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 198 },
+            { id: 'jp-21', title: 'カルビー Jagabee 薄塩バター味 5袋入り', category: 'chips', rating: 4.8, reviews: 1890, price: 340 },
+            { id: 'jp-22', title: 'でん六 豆菓子 味のこだわり 120g おつまみパック', category: 'savory', rating: 4.6, reviews: 780, price: 298 },
+            { id: 'jp-23', title: '明治 果汁グミ ぶどう 51g 1袋', category: 'gummy', rating: 4.9, reviews: 3100, price: 168 },
+            { id: 'jp-24', title: '不二家 ホームパイ 発酵バター 30枚入り大容量', category: 'sweet', rating: 4.7, reviews: 1450, price: 320 },
+            { id: 'jp-25', title: 'ぼんち ぼんち揚 あげせんべい 120g', category: 'senbei', rating: 4.8, reviews: 1670, price: 188 },
+            { id: 'jp-26', title: '岩塚製菓 黒豆せんべい 醤油味 10枚', category: 'senbei', rating: 4.7, reviews: 890, price: 210 },
+            { id: 'jp-27', title: 'カルビー ピザポテト 濃厚チーズ味 63g 1袋', category: 'chips', rating: 4.9, reviews: 3400, price: 198 },
+            { id: 'jp-28', title: 'カンロ ピュレグミ レモン 56g 1袋', category: 'gummy', rating: 4.8, reviews: 2100, price: 158 },
+            { id: 'jp-29', title: '明治 アポロ 苺チョコ 46g 1箱', category: 'sweet', rating: 4.8, reviews: 2900, price: 180 },
+            { id: 'jp-30', title: '越後製菓 ふんわり名人 きなこ餅 85g', category: 'senbei', rating: 4.9, reviews: 2750, price: 240 },
+            { id: 'jp-31', title: '湖池屋 すっぱムーチョ さっぱり梅味 55g', category: 'chips', rating: 4.6, reviews: 1100, price: 140 },
+            { id: 'jp-32', title: 'おやつカンパニー ブタメン とんこつ味 5個パック', category: 'savory', rating: 4.7, reviews: 1980, price: 450 },
+            { id: 'jp-33', title: 'グリコ ビスコ 発酵バター仕立て 15枚入り', category: 'sweet', rating: 4.8, reviews: 1800, price: 160 },
+            { id: 'jp-34', title: 'カルビー 堅あげポテト ブラックペッパー味 65g', category: 'chips', rating: 4.9, reviews: 4200, price: 170 },
+            { id: 'jp-35', title: 'サンリツ 源氏パイ 28枚入り お徳用', category: 'sweet', rating: 4.7, reviews: 1250, price: 340 },
+            { id: 'jp-36', title: 'なとり 茎わかめ 梅味 おつまみパック 116g', category: 'savory', rating: 4.6, reviews: 840, price: 420 },
+            { id: 'jp-37', title: '湖池屋 カラムーチョ ホットチリ味 55g 1袋', category: 'chips', rating: 4.8, reviews: 2600, price: 168 },
+            { id: 'jp-38', title: 'ノーベル 男梅キャンデー 80g 濃厚梅肉エキス', category: 'gummy', rating: 4.8, reviews: 1720, price: 210 },
+            { id: 'jp-39', title: 'ロッテ パイの実 チョコパイ 73g 1箱', category: 'sweet', rating: 4.9, reviews: 3600, price: 210 },
+            { id: 'jp-40', title: '天乃屋 歌舞伎揚 揚げせんべい 11枚パック', category: 'senbei', rating: 4.8, reviews: 2400, price: 210 },
+            { id: 'jp-41', title: 'カルビー フルグラ 500g プレミアムフルーツグラノーラ', category: 'chips', rating: 4.9, reviews: 6200, price: 498 },
+            { id: 'jp-42', title: 'ヤマザキビスケット チップスター うすしお味 S 50g', category: 'chips', rating: 4.7, reviews: 1400, price: 120 },
+            { id: 'jp-43', title: '森永製菓 ハイチュウ アソート 86g 4つの果実味', category: 'gummy', rating: 4.8, reviews: 1950, price: 230 },
+            { id: 'jp-44', title: '三幸製菓 雪の宿 20枚入り 甘塩せんべい', category: 'senbei', rating: 4.8, reviews: 1820, price: 198 },
+            { id: 'jp-45', title: '森永製菓 チョコボール ピーナッツ 1箱', category: 'sweet', rating: 4.7, reviews: 2200, price: 180 },
+            { id: 'jp-46', title: '扇雀飴本舗 はちみつ100%のキャンデー 51g', category: 'gummy', rating: 4.6, reviews: 750, price: 220 },
+            { id: 'jp-47', title: '江崎グリコ カプリコミニ アソート 10本パック', category: 'sweet', rating: 4.8, reviews: 1320, price: 340 },
+            { id: 'jp-48', title: 'カバヤ ジューシーグミ パイン＆マンゴー 50g', category: 'gummy', rating: 4.5, reviews: 620, price: 140 },
+            { id: 'jp-49', title: 'ブルボン エブリバーガー 66g ミニハンバーガー型', category: 'sweet', rating: 4.7, reviews: 980, price: 160 },
+            { id: 'jp-50', title: 'グリコ ジャイアントコーン チョコナッツ 1個', category: 'sweet', rating: 4.9, reviews: 2900, price: 180 },
+            { id: 'jp-51', title: '明治 きのこの山 抹茶ラテ味 期間限定', category: 'sweet', rating: 4.8, reviews: 1150, price: 210 },
+            { id: 'jp-52', title: '井村屋 ようかん 和菓子 詰合せ 5種パック', category: 'senbei', rating: 4.8, reviews: 1420, price: 480 }
         ];
 
-        // Replaced Unsplash URLs with user provided local array
         const snackImages = [
-            'AV1 Image File Format.jpg', 'IMG_3541.jpg', 'IMG_3544.jpg', 'IMG_3518.jpg', 
-            'IMG_3522.jpg', 'IMG_3504.jpg', 'IMG_3525.jpg', 'IMG_3529.jpg', 'IMG_3507.jpg', 
-            'IMG_3510.jpg', 'IMG_3532.jpg', 'IMG_3536.jpg', 'IMG_3550.jpg', 'IMG_3547.jpg', 
-            'IMG_3516.jpg', 'IMG_3513.jpg', 'IMG_3539.jpg', 'AV1 Image File Format 2.jpg', 
-            'IMG_3519.jpg', 'IMG_3502.jpg', 'IMG_3542.jpg', 'IMG_3523.jpg', 'IMG_3545.jpg', 
-            'IMG_3548.jpg', 'IMG_3505.jpg', 'IMG_3508.jpg', 'IMG_3526.jpg', 'IMG_3511.jpg', 
-            'IMG_3530.jpg', 'IMG_3551.jpg', 'IMG_3533.jpg', 'IMG_3514.jpg', 'IMG_3517.jpg', 
-            'IMG_3540.jpg', 'IMG_3537.jpg', 'AV1 Image File Format 3.jpg', 'IMG_3503.jpg', 
-            'IMG_3506.jpg', 'IMG_3521.jpg', 'IMG_3543.jpg', 'IMG_3524.jpg', 'IMG_3528.jpg', 
-            'IMG_3546.jpg', 'IMG_3509.jpg', 'IMG_3549.jpg', 'IMG_3552.jpg', 'IMG_3512.jpg', 
-            'IMG_3538.jpg', 'IMG_3515.jpg', 'IMG_3531.jpg', 'IMG_3535.jpg'
+            'AV1 Image File Format.jpg', 'IMG_3541.jpg', 'IMG_3544.jpg', 'IMG_3518.jpg', 'IMG_3522.jpg',
+            'IMG_3504.jpg', 'IMG_3525.jpg', 'IMG_3529.jpg', 'IMG_3507.jpg', 'IMG_3510.jpg', 'IMG_3532.jpg',
+            'IMG_3536.jpg', 'IMG_3550.jpg', 'IMG_3547.jpg', 'IMG_3516.jpg', 'IMG_3513.jpg', 'IMG_3539.jpg',
+            'AV1 Image File Format 2.jpg', 'IMG_3519.jpg', 'IMG_3502.jpg', 'IMG_3542.jpg', 'IMG_3523.jpg',
+            'IMG_3545.jpg', 'IMG_3548.jpg', 'IMG_3505.jpg', 'IMG_3508.jpg', 'IMG_3526.jpg', 'IMG_3511.jpg',
+            'IMG_3530.jpg', 'IMG_3551.jpg', 'IMG_3533.jpg', 'IMG_3514.jpg', 'IMG_3517.jpg', 'IMG_3540.jpg',
+            'IMG_3537.jpg', 'AV1 Image File Format 3.jpg', 'IMG_3503.jpg', 'IMG_3506.jpg', 'IMG_3521.jpg',
+            'IMG_3543.jpg', 'IMG_3524.jpg', 'IMG_3528.jpg', 'IMG_3546.jpg', 'IMG_3509.jpg', 'IMG_3549.jpg',
+            'IMG_3552.jpg', 'IMG_3512.jpg', 'IMG_3538.jpg', 'IMG_3515.jpg', 'IMG_3531.jpg', 'IMG_3535.jpg'
         ];
 
-        // Sliding window history buffer to enforce distance of at least 10 items without image repetition
         let recentImages = [];
+        let internalSearchQuery = ''; // Internally track actual search, ignore "snack" initial visual value
+        let cart = [];
+        let renderedCount = 0;
+        const BATCH_SIZE = 8;
+        let isLoadingInfinite = false;
 
         function getUniqueSnackImage() {
             const candidates = snackImages.filter(img => !recentImages.includes(img));
             const chosen = candidates.length > 0 
                 ? candidates[Math.floor(Math.random() * candidates.length)]
                 : snackImages[Math.floor(Math.random() * snackImages.length)];
-
+            
             recentImages.push(chosen);
             if (recentImages.length > 10) {
                 recentImages.shift();
@@ -330,57 +274,37 @@
             return chosen;
         }
 
-        // Application State
-        let activeCategory = 'all';
-        let searchQuery = 'スナック';
-        let cart = [];
-        let selectedProductModal = null;
-        let modalQuantity = 1;
-
-        // Infinite Scroll State
-        let renderedCount = 0;
-        const BATCH_SIZE = 10;
-        let isLoadingInfinite = false;
-
-        // Render Star Ratings
         function renderStars(rating) {
             const fullStars = Math.floor(rating);
             const hasHalf = rating % 1 >= 0.4;
             let starsHtml = '';
-
             for (let i = 0; i < 5; i++) {
                 if (i < fullStars) {
-                    starsHtml += '<i class="fa-solid fa-star text-amazon-yellow text-xs mr-0.5"></i>';
+                    starsHtml += '<i class="fa-solid fa-star text-amazon-orange text-sm"></i>';
                 } else if (i === fullStars && hasHalf) {
-                    starsHtml += '<i class="fa-solid fa-star-half-stroke text-amazon-yellow text-xs mr-0.5"></i>';
+                    starsHtml += '<i class="fa-solid fa-star-half-stroke text-amazon-orange text-sm"></i>';
                 } else {
-                    starsHtml += '<i class="fa-regular fa-star text-gray-300 text-xs mr-0.5"></i>';
+                    starsHtml += '<i class="fa-regular fa-star text-amazon-orange text-sm"></i>';
                 }
             }
             return starsHtml;
         }
 
-        // Get filtered products pool based on current search & category
         function getFilteredPool() {
             return snackProducts.filter(product => {
-                const matchesCat = activeCategory === 'all' || product.category === activeCategory;
-                const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-                return matchesCat && matchesSearch;
+                const search = internalSearchQuery.trim().toLowerCase();
+                return search === '' || product.title.toLowerCase().includes(search);
             });
         }
 
-        // Reset and re-initialize product list
         function initProductList() {
             renderedCount = 0;
-            recentImages = []; // Reset sliding window history on reset/filter
-            const inner = document.getElementById('product-list-inner');
-            inner.innerHTML = '';
+            recentImages = [];
+            document.getElementById('product-list-inner').innerHTML = '';
             loadMoreProducts();
             loadMoreProducts();
         }
 
-        // Load next batch of products seamlessly with endless rolling loop
         function loadMoreProducts() {
             const pool = getFilteredPool();
             const emptyState = document.getElementById('empty-state');
@@ -394,73 +318,74 @@
             }
 
             emptyState.classList.add('hidden');
-
             const fragment = document.createDocumentFragment();
 
+            // Setup date for realistic delivery info
+            const today = new Date();
+            today.setDate(today.getDate() + 1);
+            const deliveryStr = `明日 ${today.getMonth() + 1}月${today.getDate()}日`;
+
             for (let i = 0; i < BATCH_SIZE; i++) {
-                // Rolling index modulo pool length so it loops endlessly
-                const rawIndex = renderedCount + i;
-                const poolIndex = rawIndex % pool.length;
-                const product = pool[poolIndex];
-
-                // Dynamically pick image ensuring distance >= 10 list items
+                const product = pool[(renderedCount + i) % pool.length];
                 const displayImage = getUniqueSnackImage();
-
+                const sponsorHtml = product.sponsor ? `<span class="text-[10px] text-gray-500 mb-0.5">スポンサー</span>` : '';
+                
                 const card = document.createElement('div');
-                card.className = 'flex p-3 sm:p-4 bg-white hover:bg-gray-50/80 transition duration-150 cursor-pointer';
-                card.onclick = () => openProductModal(product.id, displayImage);
+                card.className = 'flex p-4 bg-white';
 
+                // EXACT layout from image_4.png
                 card.innerHTML = `
-                    <!-- Product Image Left -->
-                    <div class="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-50 rounded-lg p-2 flex items-center justify-center border border-gray-100 relative group">
+                    <!-- Left: Product Image Area -->
+                    <div class="w-[40%] flex flex-col relative items-center pt-2">
                         <img 
                             src="${displayImage}" 
-                            alt="${product.title}" 
-                            class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-200"
-                            onerror="this.src='https://placehold.co/150x150/f3f4f6/9ca3af?text=Snack'"
+                            class="w-full h-auto max-h-40 object-contain"
+                            onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Image'"
                         >
-                        <button onclick="event.stopPropagation(); toggleWishlist(this)" class="absolute top-1 right-1 text-gray-300 hover:text-red-500 p-1" title="お気に入り">
+                        <!-- Bottom-left view icon -->
+                        <button class="absolute bottom-1 left-0 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50">
+                            <i class="fa-solid fa-cube text-sm"></i>
+                        </button>
+                        <!-- Bottom-right heart icon -->
+                        <button onclick="toggleWishlist(this)" class="absolute bottom-1 right-0 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50">
                             <i class="fa-regular fa-heart text-sm"></i>
                         </button>
                     </div>
 
-                    <!-- Product Information Right -->
-                    <div class="ml-3 sm:ml-4 flex-1 flex flex-col justify-between">
-                        <div>
-                            <!-- Title (2 lines clamp) -->
-                            <h3 class="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2 hover:text-amazon-darkTeal">
-                                ${product.title}
-                            </h3>
-
-                            <!-- Star Rating -->
-                            <div class="flex items-center space-x-1.5 mt-1">
-                                <span class="text-xs text-amazon-darkTeal font-medium">${product.rating}</span>
-                                <div class="flex items-center">
-                                    ${renderStars(product.rating)}
-                                </div>
-                                <span class="text-[11px] text-gray-500 font-normal">(${product.reviews})</span>
+                    <!-- Right: Product Details Area -->
+                    <div class="w-[60%] pl-4 flex flex-col pb-1">
+                        ${sponsorHtml}
+                        <h3 class="text-sm font-medium text-gray-900 leading-snug line-clamp-3">
+                            ${product.title}
+                        </h3>
+                        
+                        <div class="flex items-center space-x-1 mt-1">
+                            <span class="text-xs text-amazon-link font-normal">${product.rating}</span>
+                            <div class="flex text-[10px] tracking-tighter">
+                                ${renderStars(product.rating)}
                             </div>
+                            <span class="text-xs text-amazon-link font-normal">(${product.reviews})</span>
+                        </div>
+                        
+                        <p class="text-[11px] text-gray-600 mt-1">過去1か月で1000点以上購入されました</p>
 
-                            <!-- Japanese Yen Price Format -->
-                            <div class="mt-1 flex items-baseline text-gray-900 font-bold">
-                                <span class="text-xs align-top mr-0.5">¥</span>
-                                <span class="text-lg leading-none">${product.price.toLocaleString('ja-JP')}</span>
-                            </div>
+                        <div class="mt-1 flex items-baseline">
+                            <span class="text-amazon-price text-xl font-medium">¥${product.price.toLocaleString('ja-JP')}</span>
+                            <span class="text-gray-500 text-[11px] ml-1">(¥${product.price.toLocaleString('ja-JP')}/個)</span>
                         </div>
 
-                        <!-- Delivery Tag and Add to Cart Button -->
-                        <div class="mt-1.5 flex items-center justify-between">
-                            <span class="text-[11px] text-gray-600 font-normal">
-                                <span class="font-bold text-gray-900">${product.delivery}</span>
-                            </span>
-                            <button 
-                                onclick="event.stopPropagation(); addToCart('${product.id}', true, '${displayImage}')" 
-                                class="bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs font-medium px-2.5 py-1 rounded-md shadow-xs active:scale-95 transition flex items-center space-x-1"
-                            >
-                                <i class="fa-solid fa-plus text-[10px]"></i>
-                                <span>追加</span>
-                            </button>
+                        <div class="flex items-center text-[11px] mt-1">
+                            <span class="text-blue-500 font-bold italic mr-1">prime</span>
+                            <span class="text-gray-600">翌日</span>
                         </div>
+                        <p class="text-[11px] text-gray-900 mt-0.5">無料配送 <span class="font-bold">${deliveryStr}</span> にお届け</p>
+
+                        <button 
+                            onclick="addToCart('${product.id}', '${displayImage}')" 
+                            class="mt-3 w-full bg-amazon-yellow hover:bg-yellow-400 text-gray-900 text-sm font-medium py-2 rounded-full shadow-sm active:scale-[0.98] transition"
+                        >
+                            カートに入れる
+                        </button>
                     </div>
                 `;
                 fragment.appendChild(card);
@@ -471,152 +396,61 @@
             isLoadingInfinite = false;
         }
 
-        // Detect container scroll far ahead to append items seamlessly without lag
         function handleInfiniteScroll(container) {
             if (isLoadingInfinite) return;
-            const scrollBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-            // Preload 800px before bottom so user never encounters an end or loading indicator
-            if (scrollBottom < 800) {
+            if (container.scrollHeight - container.scrollTop - container.clientHeight < 600) {
                 isLoadingInfinite = true;
                 loadMoreProducts();
             }
         }
 
-        // Search handler
+        // Search logic - ignores initial "snack" visual text unless typed
         function handleSearch(val) {
-            searchQuery = val.trim();
-            const clearBtn = document.getElementById('clear-search');
-            if (searchQuery.length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
+            // If user specifically types, update search query. 
+            // We ignore the default value to show all list items cleanly.
+            if (val === 'snack' && internalSearchQuery === '') return;
+            internalSearchQuery = val;
             initProductList();
-        }
-
-        function clearSearch() {
-            document.getElementById('search-input').value = '';
-            handleSearch('');
         }
 
         function resetSearch() {
-            document.getElementById('search-input').value = 'スナック';
-            handleSearch('スナック');
-            filterCategory('all', document.querySelector('.cat-btn'));
-        }
-
-        // Category Filter
-        function filterCategory(cat, targetBtn) {
-            activeCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-gray-900', 'text-white', 'shadow-xs');
-                btn.classList.add('bg-gray-100', 'text-gray-700');
-            });
-
-            if (targetBtn) {
-                targetBtn.classList.remove('bg-gray-100', 'text-gray-700');
-                targetBtn.classList.add('bg-gray-900', 'text-white', 'shadow-xs');
-            }
-
+            document.getElementById('search-input').value = '';
+            internalSearchQuery = '';
             initProductList();
         }
 
-        // Wishlist Toggle
         function toggleWishlist(btn) {
             const icon = btn.querySelector('i');
             if (icon.classList.contains('fa-regular')) {
-                icon.classList.remove('fa-regular', 'text-gray-300');
-                icon.classList.add('fa-solid', 'text-red-500');
-                showToast('お気に入りに追加しました');
+                icon.classList.replace('fa-regular', 'fa-solid');
+                icon.classList.add('text-red-500');
+                showToast('リストに追加しました');
             } else {
-                icon.classList.remove('fa-solid', 'text-red-500');
-                icon.classList.add('fa-regular', 'text-gray-300');
-                showToast('お気に入りから削除しました');
+                icon.classList.replace('fa-solid', 'fa-regular');
+                icon.classList.remove('text-red-500');
+                showToast('リストから削除しました');
             }
         }
 
-        // Product Modal Logic
-        function openProductModal(productId, overrideImage = null) {
+        function addToCart(productId, customImage) {
             const product = snackProducts.find(p => p.id === productId);
             if (!product) return;
-
-            selectedProductModal = { ...product };
-            if (overrideImage) {
-                selectedProductModal.displayImage = overrideImage;
-            } else {
-                selectedProductModal.displayImage = product.image;
-            }
-            modalQuantity = 1;
-
-            document.getElementById('modal-title').innerText = product.title;
-            document.getElementById('modal-image').src = selectedProductModal.displayImage;
-            document.getElementById('modal-category').innerText = product.category.toUpperCase();
-            document.getElementById('modal-stars').innerHTML = renderStars(product.rating);
-            document.getElementById('modal-rating').innerText = `${product.rating} (${product.reviews} 件のレビュー)`;
-            document.getElementById('modal-price').innerText = `¥${product.price.toLocaleString('ja-JP')}`;
-            document.getElementById('modal-delivery').innerText = product.delivery;
-            document.getElementById('modal-desc').innerText = product.description;
-            document.getElementById('modal-qty').innerText = modalQuantity;
-
-            const modal = document.getElementById('product-modal');
-            const modalContent = document.getElementById('product-modal-content');
+            const existing = cart.find(item => item.id === productId && item.image === customImage);
             
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modalContent.classList.remove('translate-y-full');
-        }
-
-        function closeProductModal() {
-            const modal = document.getElementById('product-modal');
-            const modalContent = document.getElementById('product-modal-content');
-
-            modalContent.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-            }, 200);
-        }
-
-        function adjustModalQty(delta) {
-            modalQuantity = Math.max(1, modalQuantity + delta);
-            document.getElementById('modal-qty').innerText = modalQuantity;
-        }
-
-        function addModalItemToCart() {
-            if (selectedProductModal) {
-                for (let i = 0; i < modalQuantity; i++) {
-                    addToCart(selectedProductModal.id, false, selectedProductModal.displayImage);
-                }
-                showToast(`${modalQuantity}個の「${selectedProductModal.title.substring(0, 12)}...」をカートに追加`);
-                closeProductModal();
-            }
-        }
-
-        // Cart Logic
-        function addToCart(productId, notify = true, customImage = null) {
-            const product = snackProducts.find(p => p.id === productId);
-            if (!product) return;
-
-            const itemImage = customImage || product.image;
-            const existingIndex = cart.findIndex(item => item.id === productId && item.image === itemImage);
-            
-            if (existingIndex > -1) {
-                cart[existingIndex].qty += 1;
+            if (existing) {
+                existing.qty += 1;
             } else {
-                cart.push({ ...product, image: itemImage, qty: 1, allocatedLine: 0 });
+                cart.push({ ...product, image: customImage, qty: 1 });
             }
-
             updateCartUI();
-            if (notify) {
-                showToast('商品をカートに追加しました');
-            }
+            showToast('カートに追加しました');
         }
 
-        function updateCartQuantity(productId, delta) {
+        function updateCartQty(productId, delta) {
             const index = cart.findIndex(item => item.id === productId);
             if (index > -1) {
                 cart[index].qty += delta;
-                if (cart[index].qty <= 0) {
-                    cart.splice(index, 1);
-                }
+                if (cart[index].qty <= 0) cart.splice(index, 1);
             }
             updateCartUI();
         }
@@ -624,14 +458,13 @@
         function updateCartUI() {
             const badge = document.getElementById('cart-badge');
             const totalItems = cart.reduce((acc, curr) => acc + curr.qty, 0);
-
+            
             if (totalItems > 0) {
                 badge.innerText = totalItems;
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
             }
-
             renderCartItems();
         }
 
@@ -640,171 +473,103 @@
             const subtotalEl = document.getElementById('cart-subtotal');
 
             if (cart.length === 0) {
-                container.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-center py-12">
-                        <i class="fa-solid fa-basket-shopping text-gray-300 text-4xl mb-2"></i>
-                        <p class="text-sm font-medium text-gray-500">カートに商品が入っていません</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="text-center py-10 text-gray-500 text-sm">カートに商品がありません</div>`;
                 subtotalEl.innerText = '¥0';
                 return;
             }
 
-            // Target total always exactly 764
+            // Target total always 764
             const targetTotal = 764;
+            const rawTotals = cart.map(item => item.price * item.qty);
+            const rawSum = rawTotals.reduce((a, b) => a + b, 0);
 
-            // --- New Randomized Pricing Algorithm to ensure uniqueness ---
-            if (cart.length === 1) {
-                cart[0].allocatedLine = targetTotal;
-            } else {
-                // Generate N-1 distinct random breakpoints between 1 and 763
-                // This essentially splits a stick of length 764 into completely random, mostly unique chunks
-                let breakpoints = new Set();
-                let attempts = 0;
-                let maxAttempts = cart.length * 10;
-                
-                while (breakpoints.size < cart.length - 1 && attempts < maxAttempts) {
-                    let bp = Math.floor(Math.random() * (targetTotal - 1)) + 1;
-                    breakpoints.add(bp);
-                    attempts++;
-                }
+            // Proportionally divide 764 Yen among items in cart
+            let itemsWithAllocated = cart.map((item, index) => {
+                const rawLine = rawTotals[index];
+                const idealLine = rawSum > 0 ? (rawLine / rawSum) * targetTotal : targetTotal / cart.length;
+                const floorLine = Math.floor(idealLine);
+                const remainder = idealLine - floorLine;
+                return {
+                    ...item,
+                    cartIndex: index,
+                    allocatedLine: floorLine,
+                    remainder: remainder
+                };
+            });
 
-                if (breakpoints.size < cart.length - 1) {
-                    // Extremely rare fallback if we couldn't generate unique randoms
-                    let base = Math.floor(targetTotal / cart.length);
-                    cart.forEach(item => item.allocatedLine = base);
-                    cart[0].allocatedLine += targetTotal - (base * cart.length);
-                } else {
-                    let sortedBreakpoints = Array.from(breakpoints).sort((a, b) => a - b);
-                    let parts = [];
-                    let prev = 0;
-                    
-                    // Calculate lengths between breakpoints
-                    for (let bp of sortedBreakpoints) {
-                        parts.push(bp - prev);
-                        prev = bp;
-                    }
-                    parts.push(targetTotal - prev); // final chunk
+            // Distribute remaining yen to reach exact total of 764
+            let currentSum = itemsWithAllocated.reduce((acc, curr) => acc + curr.allocatedLine, 0);
+            let diff = targetTotal - currentSum;
 
-                    // Sort parts ascending to match against raw value size
-                    parts.sort((a, b) => a - b);
-
-                    // Sort cart items tracking original index so cheaper items get smaller random chunks generally
-                    let itemMappings = cart.map((item, idx) => ({
-                        index: idx,
-                        rawTotal: item.price * item.qty
-                    })).sort((a, b) => a.rawTotal - b.rawTotal);
-
-                    // Assign the generated parts back to cart items
-                    itemMappings.forEach((mapping, i) => {
-                        cart[mapping.index].allocatedLine = parts[i];
-                    });
-                }
+            const sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
+            for (let i = 0; i < diff; i++) {
+                sortedByRemainder[i].allocatedLine += 1;
             }
-            // -------------------------------------------------------------
 
-            container.innerHTML = cart.map(item => {
+            // Map back to original cart order
+            const finalCartItems = itemsWithAllocated.map(item => {
+                return sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
+            });
+
+            container.innerHTML = finalCartItems.map(item => {
                 const unitPriceDetail = item.qty > 1 
-                    ? `<span class="text-[10px] text-gray-400 font-normal ml-1">(¥${Math.round(item.allocatedLine / item.qty)} × ${item.qty})</span>` 
+                    ? `<span class="text-[10px] text-gray-500 ml-1">(¥${Math.round(item.allocatedLine / item.qty)}/個)</span>` 
                     : '';
                 return `
-                    <div class="flex items-center justify-between pt-3 pb-1">
-                        <div class="flex items-center space-x-3 flex-1">
-                            <img src="${item.image}" class="w-12 h-12 object-contain rounded bg-gray-50 p-1 border border-gray-100">
-                            <div class="flex-1 pr-2">
-                                <h4 class="text-xs font-semibold text-gray-800 line-clamp-1">${item.title}</h4>
-                                <div class="flex items-center space-x-1 mt-0.5">
-                                    <span class="text-xs text-amber-600 font-bold">¥${item.allocatedLine.toLocaleString('ja-JP')}</span>
-                                    ${unitPriceDetail}
-                                </div>
+                    <div class="flex py-2">
+                        <img src="${item.image}" class="w-20 h-20 object-contain border border-gray-200 rounded p-1" onerror="this.src='https://placehold.co/100x100'">
+                        <div class="ml-3 flex-1">
+                            <h4 class="text-xs font-medium text-gray-900 line-clamp-2">${item.title}</h4>
+                            <div class="text-amazon-price font-bold text-sm mt-1">
+                                ¥${item.allocatedLine.toLocaleString('ja-JP')}
+                                ${unitPriceDetail}
                             </div>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="flex items-center border border-gray-300 rounded text-xs bg-white">
-                                <button onclick="updateCartQuantity('${item.id}', -1)" class="px-2 py-1.5 text-gray-600 hover:bg-gray-100 font-bold active:bg-gray-200">-</button>
-                                <span class="px-2 font-semibold text-gray-800">${item.qty}</span>
-                                <button onclick="updateCartQuantity('${item.id}', 1)" class="px-2 py-1.5 text-gray-600 hover:bg-gray-100 font-bold active:bg-gray-200">+</button>
+                            <div class="flex items-center mt-2 border border-gray-300 rounded shadow-sm w-max bg-gray-50">
+                                <button onclick="updateCartQty('${item.id}', -1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-l text-gray-600">-</button>
+                                <span class="px-3 text-sm bg-white">${item.qty}</span>
+                                <button onclick="updateCartQty('${item.id}', 1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-r text-gray-600">+</button>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
-
+            
             subtotalEl.innerText = `¥${targetTotal.toLocaleString('ja-JP')}`;
         }
 
         function openCartDrawer() {
             renderCartItems();
-            const drawer = document.getElementById('cart-drawer');
-            const drawerContent = document.getElementById('cart-drawer-content');
-            
-            drawer.classList.remove('opacity-0', 'pointer-events-none');
-            drawerContent.classList.remove('translate-y-full');
+            document.getElementById('cart-drawer').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('cart-drawer-content').classList.remove('translate-y-full');
         }
 
         function closeCartDrawer() {
-            const drawer = document.getElementById('cart-drawer');
-            const drawerContent = document.getElementById('cart-drawer-content');
-
-            drawerContent.classList.add('translate-y-full');
+            document.getElementById('cart-drawer-content').classList.add('translate-y-full');
             setTimeout(() => {
-                drawer.classList.add('opacity-0', 'pointer-events-none');
-            }, 200);
+                document.getElementById('cart-drawer').classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
         }
 
         function checkout() {
-            if (cart.length === 0) {
-                showToast('カートが空です');
-                return;
-            }
+            if (cart.length === 0) return;
             showToast('ご注文ありがとうございます！');
             cart = [];
             updateCartUI();
             closeCartDrawer();
         }
 
-        // Toast Helper
         let toastTimeout;
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            const messageEl = document.getElementById('toast-message');
-            
-            messageEl.innerText = msg;
+            document.getElementById('toast-message').innerText = msg;
             toast.classList.remove('opacity-0', 'pointer-events-none');
-
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none');
             }, 2500);
         }
 
-        // Tab Switching Navigation
-        function switchTab(tabName) {
-            const navs = ['home', 'profile', 'cart', 'menu'];
-            navs.forEach(nav => {
-                const el = document.getElementById(`nav-${nav}`);
-                if (el) {
-                    if (nav === tabName && nav !== 'cart') {
-                        el.classList.add('text-amazon-darkTeal');
-                        el.classList.remove('text-gray-500');
-                    } else if (nav !== 'cart') {
-                        el.classList.remove('text-amazon-darkTeal');
-                        el.classList.add('text-gray-500');
-                    }
-                }
-            });
-
-            if (tabName === 'profile') {
-                showToast('マイページを開きました');
-            } else if (tabName === 'menu') {
-                showToast('カテゴリー・メニュー');
-            }
-        }
-
-        // Initialization on Load
-        window.onload = function() {
-            initProductList();
-        };
+        window.onload = initProductList;
     </script>
 </body>
 </html>
