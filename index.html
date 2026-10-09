@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Amazon Japan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -34,6 +35,7 @@
             }
         }
     </script>
+
     <style>
         ::-webkit-scrollbar {
             width: 6px;
@@ -64,15 +66,15 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800 antialiased min-h-screen flex justify-center items-start sm:py-6">
+<body class="bg-gray-100 font-sans text-gray-800 antialiased min-h-[100dvh] flex justify-center items-start">
 
-    <!-- Main Device Wrapper -->
-    <div class="w-full max-w-md bg-white h-screen sm:h-[844px] sm:max-h-[920px] sm:rounded-3xl sm:shadow-2xl flex flex-col relative overflow-hidden border-gray-200 sm:border">
+    <!-- Main Device Wrapper: Full height, constrained width on desktop, edge-to-edge on mobile -->
+    <div class="w-full sm:max-w-md bg-white h-[100dvh] flex flex-col relative overflow-hidden sm:border-x border-gray-300 shadow-2xl">
         
         <!-- Fixed Header Area (Search Bar + Category Bar) -->
         <div class="flex-none z-20 bg-white shadow-xs">
-            <!-- Top App Header / Search Bar Bar -->
-            <div class="bg-gradient-to-r from-[#b3f3e6] via-[#a6edd8] to-[#92e2d4] px-3 py-2.5 flex items-center space-x-2 shadow-sm">
+            <!-- Top App Header / Search Bar Bar (Includes safe-area-inset-top for iOS notches/dynamic island) -->
+            <div class="bg-gradient-to-r from-[#b3f3e6] via-[#a6edd8] to-[#92e2d4] px-3 pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2.5 flex items-center space-x-2 shadow-sm">
                 <!-- Back Button -->
                 <button onclick="resetSearch()" class="p-1.5 text-gray-800 hover:bg-black/5 rounded-full transition" title="戻る">
                     <i class="fa-solid fa-arrow-left text-lg"></i>
@@ -118,7 +120,7 @@
         <!-- Infinite Scrollable Product List Container -->
         <div class="flex-1 overflow-y-auto bg-white divide-y divide-gray-100" id="product-container" onscroll="handleInfiniteScroll(this)">
             <!-- Product items rendered dynamically via JS -->
-            <div id="product-list-inner" class="divide-y divide-gray-100"></div>
+            <div id="product-list-inner" class="divide-y divide-gray-100 pb-4"></div>
         </div>
 
         <!-- Empty Search State Container -->
@@ -131,8 +133,8 @@
             <button onclick="resetSearch()" class="mt-4 bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs px-4 py-2 rounded-lg font-medium shadow-sm transition">すべてのスナックを表示</button>
         </div>
 
-        <!-- Fixed Bottom Navigation Bar -->
-        <div class="flex-none bg-white border-t border-gray-200 flex justify-around items-center py-2 px-1 z-20">
+        <!-- Fixed Bottom Navigation Bar (Includes safe-area-inset-bottom for iOS address bar/home indicator) -->
+        <div class="flex-none bg-white border-t border-gray-200 flex justify-around items-center pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] px-1 z-20">
             <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-amazon-darkTeal font-medium text-[10px] w-1/4 py-1">
                 <i class="fa-solid fa-house text-xl mb-0.5"></i>
                 <span>ホーム</span>
@@ -156,7 +158,7 @@
 
         <!-- Product Detail Drawer Modal -->
         <div id="product-modal" class="fixed inset-0 bg-black/50 z-50 flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
-            <div id="product-modal-content" class="bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto p-4 transform translate-y-full transition-transform duration-300">
+            <div id="product-modal-content" class="bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] transform translate-y-full transition-transform duration-300">
                 <div class="flex justify-between items-center mb-2">
                     <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded" id="modal-category">プレミアムスナック</span>
                     <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">
@@ -182,7 +184,7 @@
 
                 <p id="modal-desc" class="text-xs text-gray-600 leading-relaxed border-t border-b border-gray-100 py-3 my-2"></p>
 
-                <div class="flex items-center justify-between my-4">
+                <div class="flex items-center justify-between mt-4">
                     <div class="flex items-center border border-gray-300 rounded-lg">
                         <button onclick="adjustModalQty(-1)" class="px-3 py-1 text-gray-600 hover:bg-gray-100 font-bold">-</button>
                         <span id="modal-qty" class="px-3 py-1 font-semibold text-sm">1</span>
@@ -198,7 +200,7 @@
 
         <!-- Shopping Cart Drawer -->
         <div id="cart-drawer" class="fixed inset-0 bg-black/50 z-50 flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
-            <div id="cart-drawer-content" class="bg-white rounded-t-2xl max-h-[85vh] h-[80vh] flex flex-col transform translate-y-full transition-transform duration-300">
+            <div id="cart-drawer-content" class="bg-white rounded-t-2xl h-[85dvh] flex flex-col transform translate-y-full transition-transform duration-300">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-bag-shopping text-amazon-darkTeal text-lg"></i>
@@ -214,8 +216,8 @@
                     <!-- Cart items rendered dynamically -->
                 </div>
 
-                <!-- Cart Footer Summary -->
-                <div class="p-4 border-t border-gray-200 bg-white space-y-3">
+                <!-- Cart Footer Summary (safe-area padding applied here too) -->
+                <div class="p-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-gray-200 bg-white space-y-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-gray-500">小計</span>
                         <span id="cart-subtotal" class="font-bold text-gray-900 text-base">¥0</span>
@@ -233,7 +235,7 @@
         </div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="fixed top-14 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg z-50 flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300">
+        <div id="toast" class="fixed top-[calc(4rem+env(safe-area-inset-top))] left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg z-50 flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 whitespace-nowrap">
             <i class="fa-solid fa-circle-check text-green-400 text-sm" id="toast-icon"></i>
             <span id="toast-message">商品をカートに追加しました</span>
         </div>
@@ -299,57 +301,17 @@
 
         // Replaced Unsplash URLs with user provided local array
         const snackImages = [
-            'AV1 Image File Format.jpg',
-            'IMG_3541.jpg',
-            'IMG_3544.jpg',
-            'IMG_3518.jpg',
-            'IMG_3522.jpg',
-            'IMG_3504.jpg',
-            'IMG_3525.jpg',
-            'IMG_3529.jpg',
-            'IMG_3507.jpg',
-            'IMG_3510.jpg',
-            'IMG_3532.jpg',
-            'IMG_3536.jpg',
-            'IMG_3550.jpg',
-            'IMG_3547.jpg',
-            'IMG_3516.jpg',
-            'IMG_3513.jpg',
-            'IMG_3539.jpg',
-            'AV1 Image File Format 2.jpg',
-            'IMG_3519.jpg',
-            'IMG_3502.jpg',
-            'IMG_3542.jpg',
-            'IMG_3523.jpg',
-            'IMG_3545.jpg',
-            'IMG_3548.jpg',
-            'IMG_3505.jpg',
-            'IMG_3508.jpg',
-            'IMG_3526.jpg',
-            'IMG_3511.jpg',
-            'IMG_3530.jpg',
-            'IMG_3551.jpg',
-            'IMG_3533.jpg',
-            'IMG_3514.jpg',
-            'IMG_3517.jpg',
-            'IMG_3540.jpg',
-            'IMG_3537.jpg',
-            'AV1 Image File Format 3.jpg',
-            'IMG_3503.jpg',
-            'IMG_3506.jpg',
-            'IMG_3521.jpg',
-            'IMG_3543.jpg',
-            'IMG_3524.jpg',
-            'IMG_3528.jpg',
-            'IMG_3546.jpg',
-            'IMG_3509.jpg',
-            'IMG_3549.jpg',
-            'IMG_3552.jpg',
-            'IMG_3512.jpg',
-            'IMG_3538.jpg',
-            'IMG_3515.jpg',
-            'IMG_3531.jpg',
-            'IMG_3535.jpg'
+            'AV1 Image File Format.jpg', 'IMG_3541.jpg', 'IMG_3544.jpg', 'IMG_3518.jpg', 
+            'IMG_3522.jpg', 'IMG_3504.jpg', 'IMG_3525.jpg', 'IMG_3529.jpg', 'IMG_3507.jpg', 
+            'IMG_3510.jpg', 'IMG_3532.jpg', 'IMG_3536.jpg', 'IMG_3550.jpg', 'IMG_3547.jpg', 
+            'IMG_3516.jpg', 'IMG_3513.jpg', 'IMG_3539.jpg', 'AV1 Image File Format 2.jpg', 
+            'IMG_3519.jpg', 'IMG_3502.jpg', 'IMG_3542.jpg', 'IMG_3523.jpg', 'IMG_3545.jpg', 
+            'IMG_3548.jpg', 'IMG_3505.jpg', 'IMG_3508.jpg', 'IMG_3526.jpg', 'IMG_3511.jpg', 
+            'IMG_3530.jpg', 'IMG_3551.jpg', 'IMG_3533.jpg', 'IMG_3514.jpg', 'IMG_3517.jpg', 
+            'IMG_3540.jpg', 'IMG_3537.jpg', 'AV1 Image File Format 3.jpg', 'IMG_3503.jpg', 
+            'IMG_3506.jpg', 'IMG_3521.jpg', 'IMG_3543.jpg', 'IMG_3524.jpg', 'IMG_3528.jpg', 
+            'IMG_3546.jpg', 'IMG_3509.jpg', 'IMG_3549.jpg', 'IMG_3552.jpg', 'IMG_3512.jpg', 
+            'IMG_3538.jpg', 'IMG_3515.jpg', 'IMG_3531.jpg', 'IMG_3535.jpg'
         ];
 
         // Sliding window history buffer to enforce distance of at least 10 items without image repetition
@@ -639,7 +601,7 @@
             if (existingIndex > -1) {
                 cart[existingIndex].qty += 1;
             } else {
-                cart.push({ ...product, image: itemImage, qty: 1 });
+                cart.push({ ...product, image: itemImage, qty: 1, allocatedLine: 0 });
             }
 
             updateCartUI();
@@ -688,40 +650,60 @@
                 return;
             }
 
-            // Target total always 764
+            // Target total always exactly 764
             const targetTotal = 764;
-            const rawTotals = cart.map(item => item.price * item.qty);
-            const rawSum = rawTotals.reduce((a, b) => a + b, 0);
 
-            // Proportionally divide 764 Yen among items in cart
-            let itemsWithAllocated = cart.map((item, index) => {
-                const rawLine = rawTotals[index];
-                const idealLine = rawSum > 0 ? (rawLine / rawSum) * targetTotal : targetTotal / cart.length;
-                const floorLine = Math.floor(idealLine);
-                const remainder = idealLine - floorLine;
-                return {
-                    ...item,
-                    cartIndex: index,
-                    allocatedLine: floorLine,
-                    remainder: remainder
-                };
-            });
+            // --- New Randomized Pricing Algorithm to ensure uniqueness ---
+            if (cart.length === 1) {
+                cart[0].allocatedLine = targetTotal;
+            } else {
+                // Generate N-1 distinct random breakpoints between 1 and 763
+                // This essentially splits a stick of length 764 into completely random, mostly unique chunks
+                let breakpoints = new Set();
+                let attempts = 0;
+                let maxAttempts = cart.length * 10;
+                
+                while (breakpoints.size < cart.length - 1 && attempts < maxAttempts) {
+                    let bp = Math.floor(Math.random() * (targetTotal - 1)) + 1;
+                    breakpoints.add(bp);
+                    attempts++;
+                }
 
-            // Distribute remaining yen to reach exact total of 764
-            let currentSum = itemsWithAllocated.reduce((acc, curr) => acc + curr.allocatedLine, 0);
-            let diff = targetTotal - currentSum;
+                if (breakpoints.size < cart.length - 1) {
+                    // Extremely rare fallback if we couldn't generate unique randoms
+                    let base = Math.floor(targetTotal / cart.length);
+                    cart.forEach(item => item.allocatedLine = base);
+                    cart[0].allocatedLine += targetTotal - (base * cart.length);
+                } else {
+                    let sortedBreakpoints = Array.from(breakpoints).sort((a, b) => a - b);
+                    let parts = [];
+                    let prev = 0;
+                    
+                    // Calculate lengths between breakpoints
+                    for (let bp of sortedBreakpoints) {
+                        parts.push(bp - prev);
+                        prev = bp;
+                    }
+                    parts.push(targetTotal - prev); // final chunk
 
-            const sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
-            for (let i = 0; i < diff; i++) {
-                sortedByRemainder[i].allocatedLine += 1;
+                    // Sort parts ascending to match against raw value size
+                    parts.sort((a, b) => a - b);
+
+                    // Sort cart items tracking original index so cheaper items get smaller random chunks generally
+                    let itemMappings = cart.map((item, idx) => ({
+                        index: idx,
+                        rawTotal: item.price * item.qty
+                    })).sort((a, b) => a.rawTotal - b.rawTotal);
+
+                    // Assign the generated parts back to cart items
+                    itemMappings.forEach((mapping, i) => {
+                        cart[mapping.index].allocatedLine = parts[i];
+                    });
+                }
             }
+            // -------------------------------------------------------------
 
-            // Map back to original cart order
-            const finalCartItems = itemsWithAllocated.map(item => {
-                return sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
-            });
-
-            container.innerHTML = finalCartItems.map(item => {
+            container.innerHTML = cart.map(item => {
                 const unitPriceDetail = item.qty > 1 
                     ? `<span class="text-[10px] text-gray-400 font-normal ml-1">(¥${Math.round(item.allocatedLine / item.qty)} × ${item.qty})</span>` 
                     : '';
@@ -738,10 +720,10 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <div class="flex items-center border border-gray-300 rounded text-xs">
-                                <button onclick="updateCartQuantity('${item.id}', -1)" class="px-2 py-0.5 text-gray-600 hover:bg-gray-100 font-bold">-</button>
+                            <div class="flex items-center border border-gray-300 rounded text-xs bg-white">
+                                <button onclick="updateCartQuantity('${item.id}', -1)" class="px-2 py-1.5 text-gray-600 hover:bg-gray-100 font-bold active:bg-gray-200">-</button>
                                 <span class="px-2 font-semibold text-gray-800">${item.qty}</span>
-                                <button onclick="updateCartQuantity('${item.id}', 1)" class="px-2 py-0.5 text-gray-600 hover:bg-gray-100 font-bold">+</button>
+                                <button onclick="updateCartQuantity('${item.id}', 1)" class="px-2 py-1.5 text-gray-600 hover:bg-gray-100 font-bold active:bg-gray-200">+</button>
                             </div>
                         </div>
                     </div>
