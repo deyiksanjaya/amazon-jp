@@ -339,12 +339,12 @@
             window.debugLog(`>>> INJECTING MAGIC ITEM! <<<`);
             const forcedId = 'jp-forced';
             const forcedTitle = '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ';
-            const forcedImage = 'IMG_3567.jpeg';
+            const forcedImage = 'IMG_3657.jpeg';
             const forcedPrice = 320; 
             
-            // Menggunakan inline style agar 100% tereksekusi melampaui CDN Tailwind
-            targetCard.style.border = "4px solid #ef4444"; // red-500
-            targetCard.style.backgroundColor = "#fef2f2"; // red-50
+            // Highlight merah sengaja tetap dinyalakan untuk keperluan testing/demonstrasi
+            targetCard.style.border = "4px solid #ef4444"; 
+            targetCard.style.backgroundColor = "#fef2f2"; 
             targetCard.style.transition = "all 0.5s ease-in-out";
             
             if (!snackProducts.find(p => p.id === forcedId)) {
@@ -388,47 +388,53 @@
             const dt = now - magicLastTime;
 
             if (dt > 0) {
-                const currentSpeed = deltaY / dt; // Kecepatan positif = scroll ke bawah
+                const currentSpeed = deltaY / dt; 
                 
-                // Merekam kecepatan tertinggi (puncak flick)
                 if (currentSpeed > maxSpeedReached) {
                     maxSpeedReached = currentSpeed;
                 }
 
-                // KUNCI MAGIS BARU: Deteksi saat kecepatan mulai MELAMBAT setelah flick bertenaga
-                // maxSpeed > 0.3 artinya user sempat flick kencang
-                // 0.01 < currentSpeed < 0.2 artinya layar sedang melambat (deselerasi) mau berhenti
-                if (maxSpeedReached > 0.3 && currentSpeed > 0.01 && currentSpeed < 0.2) {
-                    window.debugLog(`Decelerating! Speed drops to: ${currentSpeed.toFixed(2)}`);
+                // KUNCI MAGIS BARU: 
+                // Kita pemicu sedikit lebih awal (saat kecepatan mulai drop ke 0.35) 
+                // agar motion blur menyembunyikan perubahan tersebut dari mata.
+                if (maxSpeedReached > 0.4 && currentSpeed > 0.05 && currentSpeed < 0.35) {
                     
                     const cards = document.getElementById('product-list-inner').children;
-                    const viewportHeight = window.innerHeight;
+                    const containerRect = container.getBoundingClientRect();
+                    // containerRect.top adalah batas bawah persis dari header (search bar, filter, dll).
+                    const headerBottomEdge = containerRect.top; 
+                    
                     let injected = false;
                     
                     for (let i = 0; i < cards.length; i++) {
                         const rect = cards[i].getBoundingClientRect();
                         
-                        // Cari kartu yang saat ini persis BERADA DI BAWAH batas layar (belum terlihat)
-                        // Ketika layar benar-benar berhenti, kartu ini yang akan muncul.
-                        if (rect.top > viewportHeight && rect.top < viewportHeight + 600) {
+                        // KITA INCAR: Kartu yang SAAT INI sedang melintas turun dan persis berada 
+                        // di area sekitar batas bawah header (sampai sekitar setengah tinggi kartu).
+                        // Ketika scroll sepenuhnya berhenti sesaat kemudian, kartu ini akan jadi fokus utama di atas.
+                        if (rect.top >= headerBottomEdge - 50 && rect.top <= headerBottomEdge + 250) {
                             applyForceToCard(cards[i]);
                             window.isForcedItemInjected = true;
                             injected = true;
-                            window.debugLog(`Target injected at index ${i}, top: ${rect.top.toFixed(0)}`);
+                            window.debugLog(`🎯 Target at HEADER (Index ${i}, Top: ${rect.top.toFixed(0)})`);
                             break;
                         }
                     }
 
-                    // Fallback: Jika tidak nemu di rentang itu (misal scroll sangat ekstrem),
-                    // tembak elemen paling terakhir yang baru saja di-load oleh infinite scroll.
+                    // Fallback just in case
                     if (!injected && cards.length > 0) {
-                        applyForceToCard(cards[cards.length - 1]);
-                        window.isForcedItemInjected = true;
-                        window.debugLog(`Fallback: Injected at LAST card`);
+                        for (let i = 0; i < cards.length; i++) {
+                            const rect = cards[i].getBoundingClientRect();
+                            if (rect.bottom > headerBottomEdge) {
+                                applyForceToCard(cards[i]);
+                                window.isForcedItemInjected = true;
+                                window.debugLog(`Fallback Injected at Index ${i}`);
+                                break;
+                            }
+                        }
                     }
                 }
                 
-                // Reset tracker jika layar berhenti atau scroll ke atas
                 if (currentSpeed <= 0) {
                      maxSpeedReached = 0;
                 }
@@ -510,7 +516,7 @@
                 const sponsorHtml = product.sponsor ? `<span class="text-[10px] text-gray-500 mb-0.5">スポンサー</span>` : '';
                 
                 const card = document.createElement('div');
-                card.className = 'flex p-4 bg-white transition-colors duration-300'; // Added transition
+                card.className = 'flex p-4 bg-white transition-colors duration-300'; 
 
                 card.innerHTML = `
                     <div class="w-[40%] flex flex-col relative items-center pt-2">
