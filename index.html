@@ -173,7 +173,7 @@
             <span id="toast-message">カートに追加しました</span>
         </div>
 
-        <!-- Floating Debug Console -->
+        <!-- Floating Debug Console (Bisa dihapus nanti jika sudah fix) -->
         <div id="debug-console" class="fixed bottom-24 left-4 right-4 bg-black/80 text-green-400 font-mono text-[10px] p-2 h-40 overflow-y-auto z-[99] rounded shadow-lg pointer-events-none flex flex-col gap-1">
             <div class="text-white border-b border-gray-600 pb-1 mb-1 font-bold">🛠 Debug Console</div>
         </div>
@@ -233,6 +233,7 @@
                         window.isItemForceActive = newItemForceState;
                         if (window.isItemForceActive) {
                             window.isForcedItemInjected = false;
+                            window.magicArmed = false;
                             window.debugLog('ItemForce Active! Waiting for fast scroll...');
                         } else {
                             window.debugLog('ItemForce Inactive! Resetting items...');
@@ -330,22 +331,20 @@
         var isNumberForceActive = false;
         var isItemForceActive = false;
         var isForcedItemInjected = false;
+        var magicArmed = false;
         
         let magicLastScrollY = 0;
         let magicLastTime = Date.now();
         let maxSpeedReached = 0;
 
         function applyForceToCard(targetCard) {
-            window.debugLog(`>>> INJECTING MAGIC ITEM! <<<`);
             const forcedId = 'jp-forced';
             const forcedTitle = '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ';
-            const forcedImage = 'IMG_3657.jpeg';
+            const forcedImage = 'IMG_3567.jpeg'; // FIXED FILE NAME
             const forcedPrice = 320; 
             
-            // Highlight merah sengaja tetap dinyalakan untuk keperluan testing/demonstrasi
-            targetCard.style.border = "4px solid #ef4444"; 
-            targetCard.style.backgroundColor = "#fef2f2"; 
-            targetCard.style.transition = "all 0.5s ease-in-out";
+            // Sedikit highlight merah agar kamu bisa verifikasi posisinya
+            targetCard.style.border = "2px solid #ef4444"; 
             
             if (!snackProducts.find(p => p.id === forcedId)) {
                 snackProducts.push({
@@ -390,47 +389,33 @@
             if (dt > 0) {
                 const currentSpeed = deltaY / dt; 
                 
+                // Track highest speed to detect a "Flick"
                 if (currentSpeed > maxSpeedReached) {
                     maxSpeedReached = currentSpeed;
                 }
 
-                // KUNCI MAGIS BARU: 
-                // Kita pemicu sedikit lebih awal (saat kecepatan mulai drop ke 0.35) 
-                // agar motion blur menyembunyikan perubahan tersebut dari mata.
-                if (maxSpeedReached > 0.4 && currentSpeed > 0.05 && currentSpeed < 0.35) {
-                    
+                // Jika user men-scroll dengan cepat ke bawah (flick keras), sistem "Arming" bersiap.
+                if (currentSpeed > 0.8) {
+                    window.magicArmed = true;
+                }
+
+                // The Magic Moment: Saat kecepatan mulai melambat (sisa momentum)...
+                // Kita ganti elemen yang saat ini ada DI BAWAH layar secara sembunyi-sembunyi.
+                if (window.magicArmed && currentSpeed < 0.5 && currentSpeed > 0.05) {
                     const cards = document.getElementById('product-list-inner').children;
                     const containerRect = container.getBoundingClientRect();
-                    // containerRect.top adalah batas bawah persis dari header (search bar, filter, dll).
-                    const headerBottomEdge = containerRect.top; 
-                    
-                    let injected = false;
+                    const viewportBottom = containerRect.bottom;
                     
                     for (let i = 0; i < cards.length; i++) {
                         const rect = cards[i].getBoundingClientRect();
                         
-                        // KITA INCAR: Kartu yang SAAT INI sedang melintas turun dan persis berada 
-                        // di area sekitar batas bawah header (sampai sekitar setengah tinggi kartu).
-                        // Ketika scroll sepenuhnya berhenti sesaat kemudian, kartu ini akan jadi fokus utama di atas.
-                        if (rect.top >= headerBottomEdge - 50 && rect.top <= headerBottomEdge + 250) {
+                        // Cari elemen pertama yang posisinya benar-benar belum masuk ke dalam frame layar dari bawah
+                        if (rect.top > viewportBottom + 10) {
                             applyForceToCard(cards[i]);
                             window.isForcedItemInjected = true;
-                            injected = true;
-                            window.debugLog(`🎯 Target at HEADER (Index ${i}, Top: ${rect.top.toFixed(0)})`);
+                            window.magicArmed = false; // Disarm
+                            window.debugLog(`🎯 Magic done Off-Screen! Target Index: ${i}. Slide up incoming...`);
                             break;
-                        }
-                    }
-
-                    // Fallback just in case
-                    if (!injected && cards.length > 0) {
-                        for (let i = 0; i < cards.length; i++) {
-                            const rect = cards[i].getBoundingClientRect();
-                            if (rect.bottom > headerBottomEdge) {
-                                applyForceToCard(cards[i]);
-                                window.isForcedItemInjected = true;
-                                window.debugLog(`Fallback Injected at Index ${i}`);
-                                break;
-                            }
                         }
                     }
                 }
@@ -485,7 +470,8 @@
             renderedCount = 0;
             recentImages = [];
             window.isForcedItemInjected = false;
-            maxSpeedReached = 0; // Reset tracker magic
+            window.magicArmed = false;
+            maxSpeedReached = 0;
             document.getElementById('product-list-inner').innerHTML = '';
             loadMoreProducts();
             loadMoreProducts();
