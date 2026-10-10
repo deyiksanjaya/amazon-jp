@@ -78,12 +78,13 @@
 </head>
 <body class="bg-white font-sans text-gray-900 antialiased m-0 p-0 overflow-hidden">
 
-    <!-- Wrapper utama diubah ke fixed inset-0 agar menempel sempurna di viewport -->
+    <!-- Wrapper utama fixed inset-0 agar menempel sempurna di viewport -->
     <div class="fixed inset-0 w-full max-w-md mx-auto bg-white flex flex-col overflow-hidden">
         
         <!-- Header & Navigasi -->
         <div class="flex-none z-20 shadow-sm relative">
-            <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe">
+            <!-- Menggunakan pb-2 dan pt-safe agar tidak saling menimpa -->
+            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col">
                 
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
@@ -169,7 +170,8 @@
         <!-- Tampilan Produk Detail (PDP) -->
         <div id="pdp-view" class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 flex flex-col h-full">
             
-            <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe sticky top-0 z-20 shadow-sm flex-none">
+            <!-- Menggunakan pb-2 dan pt-safe agar tidak saling menimpa -->
+            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col sticky top-0 z-20 shadow-sm flex-none">
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
                         <button onclick="closePDP()" class="text-white p-1 hover:text-gray-300 transition flex items-center justify-center">
@@ -876,7 +878,7 @@
             }
 
             // --- Number Force Logic ---
-            const targetTotal = 746;
+            const targetTotal = 764;
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
 
