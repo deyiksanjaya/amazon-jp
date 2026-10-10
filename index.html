@@ -55,12 +55,23 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        
+        /* Mengunci gerakan vertikal di PDP secara absolut */
+        .pdp-locked {
+            touch-action: pan-x; /* Hanya izinkan swipe kiri-kanan */
+            overflow: hidden !important; 
+        }
+
+        #pdp-slide-container {
+            will-change: transform, opacity;
+        }
     </style>
 </head>
 <body class="bg-white font-sans text-gray-900 antialiased h-[100dvh] w-full m-0 p-0 overflow-hidden flex justify-center items-stretch">
 
     <div class="w-full h-full max-w-md bg-white flex flex-col relative overflow-hidden">
         
+        <!-- Header & Navigasi -->
         <div class="flex-none z-20 shadow-sm relative">
             <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe">
                 
@@ -97,8 +108,8 @@
                         type="text" 
                         id="search-input" 
                         value="snack" 
-                        class="flex-1 bg-transparent border-none outline-none text-base text-gray-900 px-3 py-2"
-                        oninput="handleSearch(this.value)"
+                        readonly
+                        class="flex-1 bg-transparent border-none outline-none text-base text-gray-900 px-3 py-2 cursor-default focus:ring-0 focus:outline-none"
                     >
                     <button class="w-12 bg-amazon-orange flex items-center justify-center text-gray-800 hover:bg-yellow-500 transition">
                         <i class="fa-solid fa-magnifying-glass text-xl"></i>
@@ -129,7 +140,8 @@
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto bg-white pb-20" id="product-container" onscroll="handleInfiniteScroll(this); handleScrollMagic(this)">
+        <!-- Area List Produk -->
+        <div class="flex-1 overflow-y-auto bg-white pb-20" id="product-container" onscroll="handleInfiniteScroll(this)">
             <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                 <p class="text-sm text-gray-800 font-medium">すべてのカテゴリーから検索結果を表示しています</p>
             </div>
@@ -139,10 +151,38 @@
         <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center bg-white z-10 absolute inset-y-32 inset-x-0">
             <i class="fa-solid fa-magnifying-glass text-4xl text-gray-300 mb-3"></i>
             <h3 class="font-semibold text-gray-800 text-base">商品が見つかりませんでした</h3>
-            <button onclick="resetSearch()" class="mt-4 border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 text-sm px-4 py-2 rounded-lg font-medium shadow-sm transition">すべての商品を表示</button>
         </div>
 
-        <div id="cart-drawer" class="fixed inset-0 bg-black/50 z-50 flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
+        <!-- Tampilan Produk Detail (PDP) Terkunci Vertikal -->
+        <div id="pdp-view" class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 flex flex-col h-full">
+            <div class="flex items-center px-3 py-3 border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm flex-none">
+                <button onclick="closePDP()" class="p-2 text-gray-800 mr-2">
+                    <i class="fa-solid fa-chevron-left text-xl"></i>
+                </button>
+                <div class="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-300">
+                    <span class="text-sm text-gray-800 flex-1 truncate font-medium">amazon.co.jp</span>
+                    <i class="fa-solid fa-rotate-right text-gray-500 text-sm"></i>
+                </div>
+                <button class="p-2 text-gray-800 ml-2 relative" onclick="openCartDrawer()">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="pdp-cart-badge" class="absolute top-1 right-0 text-amazon-orange font-bold text-[10px] bg-amazon-dark px-1.5 rounded-full hidden">0</span>
+                </button>
+            </div>
+
+            <!-- Area Swipe & Konten Terkunci -->
+            <div id="pdp-scroll-area" class="flex-1 bg-white relative pdp-locked w-full flex items-center justify-center overflow-hidden"
+                 ontouchstart="pdpTouchStart(event)" 
+                 ontouchmove="pdpTouchMove(event)" 
+                 ontouchend="pdpTouchEnd(event)">
+                 
+                <div id="pdp-slide-container" class="w-full h-full transition-transform duration-300 ease-out flex flex-col justify-start">
+                    <!-- Dynamic PDP Content -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Drawer -->
+        <div id="cart-drawer" class="fixed inset-0 bg-black/50 z-[70] flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
             <div id="cart-drawer-content" class="bg-white rounded-t-2xl max-h-[85vh] h-[80vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                     <div class="flex items-center space-x-2">
@@ -168,13 +208,14 @@
             </div>
         </div>
 
-        <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-2 rounded shadow-lg z-50 flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300">
-            <i class="fa-solid fa-check text-green-400"></i>
-            <span id="toast-message">カートに追加しました</span>
+        <!-- Toast -->
+        <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white text-xs px-4 py-3 rounded-full shadow-lg z-[80] flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 whitespace-nowrap">
+            <i class="fa-solid fa-circle-check text-green-400 text-base"></i>
+            <span id="toast-message" class="font-medium">カートに追加しました</span>
         </div>
 
-        <!-- Floating Debug Console (Bisa dihapus nanti jika sudah fix) -->
-        <div id="debug-console" class="fixed bottom-24 left-4 right-4 bg-black/80 text-green-400 font-mono text-[10px] p-2 h-40 overflow-y-auto z-[99] rounded shadow-lg pointer-events-none flex flex-col gap-1">
+        <!-- Floating Debug Console (Sembunyikan di Production) -->
+        <div id="debug-console" class="fixed bottom-24 left-4 right-4 bg-black/80 text-green-400 font-mono text-[10px] p-2 h-40 overflow-y-auto z-[99] rounded shadow-lg pointer-events-none flex flex-col gap-1 hidden">
             <div class="text-white border-b border-gray-600 pb-1 mb-1 font-bold">🛠 Debug Console</div>
         </div>
 
@@ -183,6 +224,7 @@
     <!-- Debug Utils -->
     <script>
         window.debugLog = function(message) {
+            console.log(message);
             const consoleEl = document.getElementById('debug-console');
             if (!consoleEl) return;
             const logLine = document.createElement('div');
@@ -191,10 +233,6 @@
             logLine.innerText = `[${timeStr}] ${message}`;
             consoleEl.appendChild(logLine);
             consoleEl.scrollTop = consoleEl.scrollHeight;
-            
-            if (consoleEl.children.length > 51) {
-                consoleEl.removeChild(consoleEl.children[1]);
-            }
         };
     </script>
 
@@ -225,20 +263,29 @@
             onValue(forceRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    window.debugLog(`DB Update: num=${data.numberForce}, item=${data.itemForce}`);
                     window.isNumberForceActive = (data.numberForce === 'active');
                     
-                    const newItemForceState = (data.itemForce === 'active');
-                    if (newItemForceState !== window.isItemForceActive) {
-                        window.isItemForceActive = newItemForceState;
-                        if (window.isItemForceActive) {
+                    const newItemForceValue = data.itemForce;
+                    let parsedTarget = parseInt(newItemForceValue, 10);
+                    
+                    // Cek jika parsedTarget adalah angka valid dan lebih dari 0
+                    if (!isNaN(parsedTarget) && parsedTarget > 0) {
+                        window.isItemForceActive = true;
+                        
+                        // Jika target berubah, reset state
+                        if (window.targetSwipeCount !== parsedTarget) {
+                            window.targetSwipeCount = parsedTarget;
+                            window.currentSwipeCount = 0;
+                            window.mainSwipeDirection = 0; // 0 artinya belum dikunci
                             window.isForcedItemInjected = false;
-                            window.magicArmed = false;
-                            window.debugLog('ItemForce Active! Waiting for fast scroll...');
-                        } else {
-                            window.debugLog('ItemForce Inactive! Resetting items...');
-                            if (typeof window.initProductList === 'function') window.initProductList(); 
+                            window.debugLog(`ItemForce Active! Target swipes: ${window.targetSwipeCount}`);
                         }
+                    } else {
+                        window.isItemForceActive = false;
+                        window.targetSwipeCount = 0;
+                        window.currentSwipeCount = 0;
+                        window.mainSwipeDirection = 0;
+                        window.debugLog('ItemForce Inactive!');
                     }
                 }
             }, (error) => {
@@ -249,60 +296,36 @@
         });
     </script>
 
+    <!-- Data Products & Core Logic -->
     <script>
+        const sellerNames = ['Amazon.co.jp', 'おかしのマーチ', '東京スナック本舗', '駄菓子屋本舗', 'snack-japan', 'Baffect Home Style', '和菓子市場'];
+        
+        function getRandomSeller() {
+            return sellerNames[Math.floor(Math.random() * sellerNames.length)];
+        }
+
         const snackProducts = [
-            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168 },
-            { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298 },
-            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 198 },
-            { id: 'jp-4', title: '亀田製菓 柿の種 ピーナッツ入り 6袋ファミリーパック', category: 'senbei', rating: 4.8, reviews: 2150, price: 348 },
-            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 220 },
-            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 185 },
-            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 178 },
-            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 148 },
-            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 128 },
-            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 158 },
-            { id: 'jp-11', title: 'おやつカンパニー ベビースターラーメン チキン味 6袋入', category: 'savory', rating: 4.7, reviews: 1240, price: 280 },
-            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 148 },
-            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 220 },
-            { id: 'jp-14', title: 'ブルボン ルマンド 抹茶＆ココア 詰合せ 12本', category: 'sweet', rating: 4.7, reviews: 1430, price: 380 },
-            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 135 },
-            { id: 'jp-16', title: 'グリコ プリッツ トマト味 9袋入りファミリーパック', category: 'savory', rating: 4.7, reviews: 1120, price: 320 },
-            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 198 },
-            { id: 'jp-18', title: '湖池屋 黒トリュフ＆極み塩 ポテトチップス 50g', category: 'chips', rating: 4.8, reviews: 670, price: 260 },
-            { id: 'jp-19', title: 'ネスレ キットカット ミニ 抹茶味 12枚入りパック', category: 'sweet', rating: 4.8, reviews: 2300, price: 398 },
-            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 198 },
-            { id: 'jp-21', title: 'カルビー Jagabee 薄塩バター味 5袋入り', category: 'chips', rating: 4.8, reviews: 1890, price: 340 },
-            { id: 'jp-22', title: 'でん六 豆菓子 味のこだわり 120g おつまみパック', category: 'savory', rating: 4.6, reviews: 780, price: 298 },
-            { id: 'jp-23', title: '明治 果汁グミ ぶどう 51g 1袋', category: 'gummy', rating: 4.9, reviews: 3100, price: 168 },
-            { id: 'jp-24', title: '不二家 ホームパイ 発酵バター 30枚入り大容量', category: 'sweet', rating: 4.7, reviews: 1450, price: 320 },
-            { id: 'jp-25', title: 'ぼんち ぼんち揚 あげせんべい 120g', category: 'senbei', rating: 4.8, reviews: 1670, price: 188 },
-            { id: 'jp-26', title: '岩塚製菓 黒豆せんべい 醤油味 10枚', category: 'senbei', rating: 4.7, reviews: 890, price: 210 },
-            { id: 'jp-27', title: 'カルビー ピザポテト 濃厚チーズ味 63g 1袋', category: 'chips', rating: 4.9, reviews: 3400, price: 198 },
-            { id: 'jp-28', title: 'カンロ ピュレグミ レモン 56g 1袋', category: 'gummy', rating: 4.8, reviews: 2100, price: 158 },
-            { id: 'jp-29', title: '明治 アポロ 苺チョコ 46g 1箱', category: 'sweet', rating: 4.8, reviews: 2900, price: 180 },
-            { id: 'jp-30', title: '越後製菓 ふんわり名人 きなこ餅 85g', category: 'senbei', rating: 4.9, reviews: 2750, price: 240 },
-            { id: 'jp-31', title: '湖池屋 すっぱムーチョ さっぱり梅味 55g', category: 'chips', rating: 4.6, reviews: 1100, price: 140 },
-            { id: 'jp-32', title: 'おやつカンパニー ブタメン とんこつ味 5個パック', category: 'savory', rating: 4.7, reviews: 1980, price: 450 },
-            { id: 'jp-33', title: 'グリコ ビスコ 発酵バター仕立て 15枚入り', category: 'sweet', rating: 4.8, reviews: 1800, price: 160 },
-            { id: 'jp-34', title: 'カルビー 堅あげポテト ブラックペッパー味 65g', category: 'chips', rating: 4.9, reviews: 4200, price: 170 },
-            { id: 'jp-35', title: 'サンリツ 源氏パイ 28枚入り お徳用', category: 'sweet', rating: 4.7, reviews: 1250, price: 340 },
-            { id: 'jp-36', title: 'なとり 茎わかめ 梅味 おつまみパック 116g', category: 'savory', rating: 4.6, reviews: 840, price: 420 },
-            { id: 'jp-37', title: '湖池屋 カラムーチョ ホットチリ味 55g 1袋', category: 'chips', rating: 4.8, reviews: 2600, price: 168 },
-            { id: 'jp-38', title: 'ノーベル 男梅キャンデー 80g 濃厚梅肉エキス', category: 'gummy', rating: 4.8, reviews: 1720, price: 210 },
-            { id: 'jp-39', title: 'ロッテ パイの実 チョコパイ 73g 1箱', category: 'sweet', rating: 4.9, reviews: 3600, price: 210 },
-            { id: 'jp-40', title: '天乃屋 歌舞伎揚 揚げせんべい 11枚パック', category: 'senbei', rating: 4.8, reviews: 2400, price: 210 },
-            { id: 'jp-41', title: 'カルビー フルグラ 500g プレミアムフルーツグラノーラ', category: 'chips', rating: 4.9, reviews: 6200, price: 498 },
-            { id: 'jp-42', title: 'ヤマザキビスケット チップスター うすしお味 S 50g', category: 'chips', rating: 4.7, reviews: 1400, price: 120 },
-            { id: 'jp-43', title: '森永製菓 ハイチュウ アソート 86g 4つの果実味', category: 'gummy', rating: 4.8, reviews: 1950, price: 230 },
-            { id: 'jp-44', title: '三幸製菓 雪の宿 20枚入り 甘塩せんべい', category: 'senbei', rating: 4.8, reviews: 1820, price: 198 },
-            { id: 'jp-45', title: '森永製菓 チョコボール ピーナッツ 1箱', category: 'sweet', rating: 4.7, reviews: 2200, price: 180 },
-            { id: 'jp-46', title: '扇雀飴本舗 はちみつ100%のキャンデー 51g', category: 'gummy', rating: 4.6, reviews: 750, price: 220 },
-            { id: 'jp-47', title: '江崎グリコ カプリコミニ アソート 10本パック', category: 'sweet', rating: 4.8, reviews: 1320, price: 340 },
-            { id: 'jp-48', title: 'カバヤ ジューシーグミ パイン＆マンゴー 50g', category: 'gummy', rating: 4.5, reviews: 620, price: 140 },
-            { id: 'jp-49', title: 'ブルボン エブリバーガー 66g ミニハンバーガー型', category: 'sweet', rating: 4.7, reviews: 980, price: 160 },
-            { id: 'jp-50', title: 'グリコ ジャイアントコーン チョコナッツ 1個', category: 'sweet', rating: 4.9, reviews: 2900, price: 180 },
-            { id: 'jp-51', title: '明治 きのこの山 抹茶ラテ味 期間限定', category: 'sweet', rating: 4.8, reviews: 1150, price: 210 },
-            { id: 'jp-52', title: '井村屋 ようかん 和菓子 詰合せ 5種パック', category: 'senbei', rating: 4.8, reviews: 1420, price: 480 }
+            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168, store: getRandomSeller() },
+            { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298, store: getRandomSeller() },
+            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 198, store: getRandomSeller() },
+            { id: 'jp-4', title: '亀田製菓 柿の種 ピーナッツ入り 6袋ファミリーパック', category: 'senbei', rating: 4.8, reviews: 2150, price: 348, store: getRandomSeller() },
+            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 220, store: getRandomSeller() },
+            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 185, store: getRandomSeller() },
+            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 178, store: getRandomSeller() },
+            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 148, store: getRandomSeller() },
+            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 128, store: getRandomSeller() },
+            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 158, store: getRandomSeller() },
+            { id: 'jp-11', title: 'おやつカンパニー ベビースターラーメン チキン味 6袋入', category: 'savory', rating: 4.7, reviews: 1240, price: 280, store: getRandomSeller() },
+            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 148, store: getRandomSeller() },
+            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 220, store: getRandomSeller() },
+            { id: 'jp-14', title: 'ブルボン ルマンド 抹茶＆ココア 詰合せ 12本', category: 'sweet', rating: 4.7, reviews: 1430, price: 380, store: getRandomSeller() },
+            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 135, store: getRandomSeller() },
+            { id: 'jp-16', title: 'グリコ プリッツ トマト味 9袋入りファミリーパック', category: 'savory', rating: 4.7, reviews: 1120, price: 320, store: getRandomSeller() },
+            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 198, store: getRandomSeller() },
+            { id: 'jp-18', title: '湖池屋 黒トリュフ＆極み塩 ポテトチップス 50g', category: 'chips', rating: 4.8, reviews: 670, price: 260, store: getRandomSeller() },
+            { id: 'jp-19', title: 'ネスレ キットカット ミニ 抹茶味 12枚入りパック', category: 'sweet', rating: 4.8, reviews: 2300, price: 398, store: getRandomSeller() },
+            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 198, store: getRandomSeller() },
+            { id: 'jp-21', title: 'カルビー Jagabee 薄塩バター味 5袋入り', category: 'chips', rating: 4.8, reviews: 1890, price: 340, store: getRandomSeller() }
         ];
 
         const snackImages = [
@@ -318,7 +341,6 @@
         ];
 
         let recentImages = [];
-        let internalSearchQuery = ''; 
         let cart = [];
         let renderedCount = 0;
         const BATCH_SIZE = 8;
@@ -327,108 +349,13 @@
         let lastAddedProductId = null;
         let priceChangeTimeout = null;
 
-        // --- Variabel Global Status Magic ---
-        var isNumberForceActive = false;
-        var isItemForceActive = false;
-        var isForcedItemInjected = false;
-        var magicArmed = false;
-        
-        let magicLastScrollY = 0;
-        let magicLastTime = Date.now();
-        let maxSpeedReached = 0;
-
-        function applyForceToCard(targetCard) {
-            const forcedId = 'jp-forced';
-            const forcedTitle = '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ';
-            const forcedImage = 'IMG_3567.jpeg'; // FIXED FILE NAME
-            const forcedPrice = 320; 
-            
-            // Sedikit highlight merah agar kamu bisa verifikasi posisinya
-            targetCard.style.border = "2px solid #ef4444"; 
-            
-            if (!snackProducts.find(p => p.id === forcedId)) {
-                snackProducts.push({
-                    id: forcedId,
-                    title: forcedTitle,
-                    category: 'sweet',
-                    rating: 4.9,
-                    reviews: 1850,
-                    price: forcedPrice
-                });
-            }
-            
-            const img = targetCard.querySelector('img');
-            if(img) img.src = forcedImage;
-            
-            const h3 = targetCard.querySelector('h3');
-            if(h3) h3.innerText = forcedTitle;
-            
-            const priceEl = targetCard.querySelector('.text-amazon-price');
-            if(priceEl) {
-                priceEl.setAttribute('data-product-id', forcedId);
-                priceEl.innerText = `¥${forcedPrice.toLocaleString('ja-JP')}`;
-            }
-            
-            const unitEl = targetCard.querySelector('[class^="home-unit-"]');
-            if(unitEl) {
-                unitEl.className = `home-unit-${forcedId} text-gray-500 text-[11px] ml-1`;
-                unitEl.innerText = `(¥${forcedPrice.toLocaleString('ja-JP')}/個)`;
-            }
-            
-            const btn = targetCard.querySelector('button[onclick^="addToCart"]');
-            if(btn) btn.setAttribute('onclick', `addToCart('${forcedId}', '${forcedImage}')`);
-        }
-
-        function handleScrollMagic(container) {
-            if (!window.isItemForceActive || window.isForcedItemInjected) return;
-
-            const now = Date.now();
-            const deltaY = container.scrollTop - magicLastScrollY;
-            const dt = now - magicLastTime;
-
-            if (dt > 0) {
-                const currentSpeed = deltaY / dt; 
-                
-                // Track highest speed to detect a "Flick"
-                if (currentSpeed > maxSpeedReached) {
-                    maxSpeedReached = currentSpeed;
-                }
-
-                // Jika user men-scroll dengan cepat ke bawah (flick keras), sistem "Arming" bersiap.
-                if (currentSpeed > 0.8) {
-                    window.magicArmed = true;
-                }
-
-                // The Magic Moment: Saat kecepatan mulai melambat (sisa momentum)...
-                // Kita ganti elemen yang saat ini ada DI BAWAH layar secara sembunyi-sembunyi.
-                if (window.magicArmed && currentSpeed < 0.5 && currentSpeed > 0.05) {
-                    const cards = document.getElementById('product-list-inner').children;
-                    const containerRect = container.getBoundingClientRect();
-                    const viewportBottom = containerRect.bottom;
-                    
-                    for (let i = 0; i < cards.length; i++) {
-                        const rect = cards[i].getBoundingClientRect();
-                        
-                        // Cari elemen pertama yang posisinya benar-benar belum masuk ke dalam frame layar dari bawah
-                        if (rect.top > viewportBottom + 10) {
-                            applyForceToCard(cards[i]);
-                            window.isForcedItemInjected = true;
-                            window.magicArmed = false; // Disarm
-                            window.debugLog(`🎯 Magic done Off-Screen! Target Index: ${i}. Slide up incoming...`);
-                            break;
-                        }
-                    }
-                }
-                
-                if (currentSpeed <= 0) {
-                     maxSpeedReached = 0;
-                }
-            }
-
-            magicLastScrollY = container.scrollTop;
-            magicLastTime = now;
-        }
-        // --- End Magic Functions ---
+        // --- Variabel State Magic PDP ---
+        window.isNumberForceActive = false;
+        window.isItemForceActive = false;
+        window.isForcedItemInjected = false;
+        window.targetSwipeCount = 0;
+        window.currentSwipeCount = 0;
+        window.mainSwipeDirection = 0;
 
         function getUniqueSnackImage() {
             const candidates = snackImages.filter(img => !recentImages.includes(img));
@@ -448,30 +375,21 @@
             const hasHalf = rating % 1 >= 0.4;
             let starsHtml = '';
             for (let i = 0; i < 5; i++) {
-                if (i < fullStars) {
-                    starsHtml += '<i class="fa-solid fa-star text-amazon-orange text-sm"></i>';
-                } else if (i === fullStars && hasHalf) {
-                    starsHtml += '<i class="fa-solid fa-star-half-stroke text-amazon-orange text-sm"></i>';
-                } else {
-                    starsHtml += '<i class="fa-regular fa-star text-amazon-orange text-sm"></i>';
-                }
+                if (i < fullStars) starsHtml += '<i class="fa-solid fa-star text-amazon-orange text-sm"></i>';
+                else if (i === fullStars && hasHalf) starsHtml += '<i class="fa-solid fa-star-half-stroke text-amazon-orange text-sm"></i>';
+                else starsHtml += '<i class="fa-regular fa-star text-amazon-orange text-sm"></i>';
             }
             return starsHtml;
         }
 
         function getFilteredPool() {
-            return snackProducts.filter(product => {
-                const search = internalSearchQuery.trim().toLowerCase();
-                return search === '' || product.title.toLowerCase().includes(search);
-            });
+            return snackProducts; 
         }
 
         function initProductList() {
             renderedCount = 0;
             recentImages = [];
             window.isForcedItemInjected = false;
-            window.magicArmed = false;
-            maxSpeedReached = 0;
             document.getElementById('product-list-inner').innerHTML = '';
             loadMoreProducts();
             loadMoreProducts();
@@ -497,31 +415,24 @@
             const deliveryStr = `明日 ${today.getMonth() + 1}月${today.getDate()}日`;
 
             for (let i = 0; i < BATCH_SIZE; i++) {
-                const product = pool[(renderedCount + i) % pool.length];
-                const displayImage = getUniqueSnackImage();
-                const sponsorHtml = product.sponsor ? `<span class="text-[10px] text-gray-500 mb-0.5">スポンサー</span>` : '';
+                const globalIndex = (renderedCount + i) % pool.length;
+                const product = pool[globalIndex];
+                
+                const displayImage = product.id === 'jp-forced' ? 'IMG_3567.jpeg' : getUniqueSnackImage();
                 
                 const card = document.createElement('div');
-                card.className = 'flex p-4 bg-white transition-colors duration-300'; 
+                card.className = 'flex p-4 bg-white transition-colors duration-300 border-b border-gray-100'; 
 
                 card.innerHTML = `
-                    <div class="w-[40%] flex flex-col relative items-center pt-2">
-                        <img 
-                            src="${displayImage}" 
-                            class="w-full h-auto max-h-40 object-contain"
-                            onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Image'"
-                        >
-                        <button class="absolute bottom-1 left-0 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50">
-                            <i class="fa-solid fa-cube text-sm"></i>
-                        </button>
-                        <button onclick="toggleWishlist(this)" class="absolute bottom-1 right-0 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50">
+                    <div class="w-[40%] flex flex-col relative items-center pt-2 cursor-pointer" onclick="openPDP(${globalIndex}, '${displayImage}')">
+                        <img src="${displayImage}" class="w-full h-auto max-h-40 object-contain mix-blend-multiply" onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Image'">
+                        <button onclick="event.stopPropagation(); toggleWishlist(this)" class="absolute bottom-1 right-0 w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center shadow-sm text-gray-600 hover:bg-gray-50">
                             <i class="fa-regular fa-heart text-sm"></i>
                         </button>
                     </div>
 
                     <div class="w-[60%] pl-4 flex flex-col pb-1">
-                        ${sponsorHtml}
-                        <h3 class="text-sm font-medium text-gray-900 leading-snug line-clamp-3">
+                        <h3 class="text-sm font-medium text-gray-900 leading-snug line-clamp-3 cursor-pointer hover:text-amazon-link" onclick="openPDP(${globalIndex}, '${displayImage}')">
                             ${product.title}
                         </h3>
                         
@@ -532,12 +443,9 @@
                             </div>
                             <span class="text-xs text-amazon-link font-normal">(${product.reviews})</span>
                         </div>
-                        
-                        <p class="text-[11px] text-gray-600 mt-1">過去1か月で1000点以上購入されました</p>
 
                         <div class="mt-1 flex items-baseline">
                             <span data-product-id="${product.id}" class="text-amazon-price text-xl font-medium">¥${product.price.toLocaleString('ja-JP')}</span>
-                            <span class="home-unit-${product.id} text-gray-500 text-[11px] ml-1">(¥${product.price.toLocaleString('ja-JP')}/個)</span>
                         </div>
 
                         <div class="flex items-center text-[11px] mt-1">
@@ -546,10 +454,7 @@
                         </div>
                         <p class="text-[11px] text-gray-900 mt-0.5">無料配送 <span class="font-bold">${deliveryStr}</span> にお届け</p>
 
-                        <button 
-                            onclick="addToCart('${product.id}', '${displayImage}')" 
-                            class="mt-3 w-full bg-amazon-yellow hover:bg-yellow-400 text-gray-900 text-sm font-medium py-2 rounded-full shadow-sm active:scale-[0.98] transition"
-                        >
+                        <button onclick="event.stopPropagation(); addToCart('${product.id}', '${displayImage}')" class="mt-3 w-full bg-amazon-yellow hover:bg-yellow-400 text-gray-900 text-sm font-medium py-2 rounded-full shadow-sm active:scale-[0.98] transition">
                             カートに入れる
                         </button>
                     </div>
@@ -570,16 +475,275 @@
             }
         }
 
-        function handleSearch(val) {
-            if (val === 'snack' && internalSearchQuery === '') return;
-            internalSearchQuery = val;
-            initProductList();
+        // --- LOGIKA MAGIS PDP SWIPE ---
+        let currentPdpProduct = null;
+        let currentPdpIndex = 0;
+        let currentPdpImage = '';
+        let pdpTouchStartX = 0;
+        let pdpTouchStartY = 0;
+        let isAnimatingPDP = false;
+
+        function openPDP(index, image) {
+            const pool = getFilteredPool();
+            currentPdpIndex = index;
+            currentPdpProduct = pool[index];
+            currentPdpImage = image;
+            
+            // Reset state counter setiap kali PDP dibuka dari luar
+            if (window.isItemForceActive) {
+                window.currentSwipeCount = 0;
+                window.mainSwipeDirection = 0; // Reset pengunci arah insting
+            }
+
+            renderPDPContent(currentPdpProduct, currentPdpImage);
+            document.getElementById('pdp-view').classList.remove('translate-x-full');
+            
+            // Lock body scroll saat PDP terbuka
+            document.body.style.overflow = 'hidden';
         }
 
-        function resetSearch() {
-            document.getElementById('search-input').value = '';
-            internalSearchQuery = '';
-            initProductList();
+        function closePDP() {
+            document.getElementById('pdp-view').classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        function renderPDPContent(product, image) {
+            const container = document.getElementById('pdp-slide-container');
+            const priceStr = product.price.toLocaleString('ja-JP');
+            const storeName = product.store || 'Amazon.co.jp';
+
+            const today = new Date();
+            today.setDate(today.getDate() + 1);
+            const deliveryStr = `明日 ${today.getMonth() + 1}月${today.getDate()}日`;
+
+            // Tidak ada dots carousel, layout dimiripkan main list
+            container.innerHTML = `
+                <div class="px-5 w-full max-w-md mx-auto pt-2 pb-16 h-full overflow-y-hidden no-scrollbar relative flex flex-col justify-start">
+                    
+                    <div class="flex items-center justify-between mt-2 mb-2">
+                        <div class="text-amazon-link text-xs hover:underline cursor-pointer">${storeName}のストアを表示</div>
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xs text-amazon-link">${product.rating}</span>
+                            <div class="flex text-[10px] tracking-tighter">
+                                ${renderStars(product.rating)}
+                            </div>
+                            <span class="text-xs text-amazon-link font-normal">(${product.reviews})</span>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-sm font-medium text-gray-900 leading-snug mb-3">${product.title}</h1>
+                    
+                    <div class="w-full h-56 flex items-center justify-center relative mb-4 bg-white rounded-lg">
+                        <img src="${image}" class="w-full h-full object-contain mix-blend-multiply" onerror="this.src='https://placehold.co/400x400/fff/ccc?text=Image'">
+                        
+                        <button class="absolute bottom-2 left-2 w-9 h-9 rounded-full bg-white shadow border border-gray-200 flex items-center justify-center text-gray-600 hover:text-gray-900">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        </button>
+                        <button class="absolute bottom-2 right-2 w-9 h-9 rounded-full bg-white shadow border border-gray-200 flex items-center justify-center text-gray-600 hover:text-red-500 transition-colors" onclick="toggleWishlistIcon(this)">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-3 flex-1 flex flex-col">
+                        <div class="flex items-baseline mb-1">
+                            <span class="text-amazon-price text-sm font-medium">¥</span>
+                            <span class="text-amazon-price text-3xl font-medium ml-0.5" data-pdp-price="${product.id}">${priceStr}</span>
+                        </div>
+                        
+                        <div class="flex items-center text-[12px] mt-1">
+                            <span class="text-blue-500 font-bold italic mr-1">prime</span>
+                            <span class="text-gray-600">翌日</span>
+                        </div>
+                        <p class="text-[12px] text-gray-900 mt-0.5">無料配送 <span class="font-bold">${deliveryStr}</span> にお届け</p>
+                        
+                        <div class="flex items-center text-xs text-amazon-link mt-2 mb-2">
+                            <i class="fa-solid fa-location-dot mr-1.5 text-gray-600"></i> 日本にお届け
+                        </div>
+                        
+                        <div class="text-green-700 font-medium text-sm mb-3">
+                            在庫あり
+                        </div>
+                        
+                        <div class="relative w-24 mb-4">
+                            <select class="w-full appearance-none bg-gray-100 border border-gray-300 text-gray-900 py-1.5 px-3 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                                <option>数量: 1</option>
+                                <option>数量: 2</option>
+                                <option>数量: 3</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <button onclick="addToCartPDP('${product.id}', '${image}')" class="w-full bg-amazon-yellow hover:bg-yellow-400 py-3 rounded-full shadow-sm text-sm font-medium active:scale-[0.98] transition">
+                                カートに入れる
+                            </button>
+                            <button onclick="buyNowPDP('${product.id}', '${image}')" class="w-full bg-amazon-orange hover:bg-orange-500 py-3 rounded-full shadow-sm text-sm font-medium active:scale-[0.98] transition">
+                                今すぐ買う
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center text-xs text-amazon-link mb-3">
+                            <i class="fa-solid fa-lock text-gray-500 mr-2"></i>
+                            <span>安全なトランザクション</span>
+                        </div>
+                        
+                        <div class="space-y-1 text-xs text-gray-500">
+                            <div class="flex"><span class="w-16">出荷元</span><span class="text-gray-900 font-medium">Amazon</span></div>
+                            <div class="flex"><span class="w-16">販売元</span><span class="text-amazon-link truncate">${storeName}</span></div>
+                            <div class="flex"><span class="w-16">返品</span><span class="text-amazon-link">30日間の返品・返金</span></div>
+                        </div>
+
+                        <div class="mt-4 border-t border-gray-200 pt-4 pb-6">
+                            <h2 class="text-sm font-bold text-gray-900 mb-2">商品の説明</h2>
+                            <div class="text-sm text-gray-500 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100 flex items-center justify-center italic text-center h-20">
+                                商品説明はありません
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleWishlistIcon(btn) {
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('fa-regular')) {
+                icon.classList.replace('fa-regular', 'fa-solid');
+                icon.classList.add('text-red-500');
+            } else {
+                icon.classList.replace('fa-solid', 'fa-regular');
+                icon.classList.remove('text-red-500');
+            }
+        }
+
+        function pdpTouchStart(e) {
+            if (isAnimatingPDP) return;
+            pdpTouchStartX = e.changedTouches[0].screenX;
+            pdpTouchStartY = e.changedTouches[0].screenY;
+        }
+
+        function pdpTouchMove(e) { 
+            // Blokir total fungsi scroll vertikal dari browser agar layar stabil
+            if (e.cancelable) e.preventDefault(); 
+        }
+
+        function pdpTouchEnd(e) {
+            if (isAnimatingPDP) return;
+            
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            
+            const dx = touchEndX - pdpTouchStartX;
+            const dy = touchEndY - pdpTouchStartY;
+            
+            // Evaluasi hanya jika dominan swipe horizontal
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+                if (dx < 0) {
+                    navigatePDP(1); // Swipe ke Kiri -> Arah 1 (Next)
+                } else {
+                    navigatePDP(-1); // Swipe ke Kanan -> Arah -1 (Prev)
+                }
+            }
+        }
+
+        function navigatePDP(direction) {
+            isAnimatingPDP = true;
+            let pool = getFilteredPool();
+            let targetProduct, targetImage;
+            
+            let nextIndex = (currentPdpIndex + direction + pool.length) % pool.length;
+
+            if (window.isItemForceActive && !window.isForcedItemInjected && window.targetSwipeCount > 0) {
+                
+                // 1. Kunci Insting Arah Pertama
+                if (window.mainSwipeDirection === 0) {
+                    window.mainSwipeDirection = direction;
+                }
+
+                // 2. Evaluasi Arah Swipe Saat Ini vs Arah Insting
+                if (direction === window.mainSwipeDirection) {
+                    window.currentSwipeCount++; // Searah insting utama = Tambah
+                } else {
+                    window.currentSwipeCount--; // Berlawanan arah insting = Kurangi
+                }
+
+                window.debugLog(`Swipe! Dir: ${direction}, Main: ${window.mainSwipeDirection}, Count: ${window.currentSwipeCount}/${window.targetSwipeCount}`);
+
+                // 3. Cek pencapaian Target
+                if (window.currentSwipeCount === window.targetSwipeCount) {
+                    // Siapkan Item Paksaan (Fujiya Milky Pie)
+                    targetProduct = {
+                        id: 'jp-forced',
+                        title: '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ',
+                        category: 'sweet',
+                        rating: 4.9,
+                        reviews: 1850,
+                        price: 320,
+                        store: '不二家 (Fujiya)'
+                    };
+                    targetImage = 'IMG_3567.jpeg';
+
+                    // Sisipkan ke array (menyatu dengan list secara natural)
+                    // Sisipkan pada posisi yang akan diakses oleh 'nextIndex' selanjutnya
+                    let insertIndex = direction > 0 ? currentPdpIndex + 1 : currentPdpIndex;
+                    snackProducts.splice(insertIndex, 0, targetProduct);
+                    
+                    window.isForcedItemInjected = true;
+                    window.debugLog(`🎯 Target Reached! Forced item injected at index ${insertIndex}`);
+                    
+                    // Refresh referensi array
+                    pool = getFilteredPool();
+                    currentPdpIndex = pool.findIndex(p => p.id === 'jp-forced');
+                } else {
+                    currentPdpIndex = nextIndex;
+                    targetProduct = pool[currentPdpIndex];
+                    targetImage = getUniqueSnackImage();
+                }
+            } else {
+                currentPdpIndex = nextIndex;
+                targetProduct = pool[currentPdpIndex];
+                targetImage = (targetProduct.id === 'jp-forced') ? 'IMG_3567.jpeg' : getUniqueSnackImage();
+            }
+
+            currentPdpProduct = targetProduct;
+            currentPdpImage = targetImage;
+
+            const container = document.getElementById('pdp-slide-container');
+            
+            // Animasi Keluar
+            container.style.transition = 'transform 0.2s ease-in, opacity 0.2s';
+            container.style.transform = direction > 0 ? 'translateX(-30px)' : 'translateX(30px)';
+            container.style.opacity = '0';
+
+            setTimeout(() => {
+                // UPDATE DOM DIBELAKANG LAYAR sebelum slide masuk
+                renderPDPContent(currentPdpProduct, currentPdpImage);
+                
+                container.style.transition = 'none';
+                container.style.transform = direction > 0 ? 'translateX(30px)' : 'translateX(-30px)';
+                void container.offsetWidth; // Paksa browser membaca DOM ulang (reflow)
+                
+                // Animasi Masuk
+                container.style.transition = 'transform 0.25s ease-out, opacity 0.25s';
+                container.style.transform = 'translateX(0)';
+                container.style.opacity = '1';
+                
+                setTimeout(() => {
+                    isAnimatingPDP = false;
+                }, 250);
+            }, 200);
+        }
+
+        // --- CART ---
+        function addToCartPDP(productId, image) {
+            addToCart(productId, image);
+        }
+
+        function buyNowPDP(productId, image) {
+            addToCart(productId, image);
+            closePDP();
+            setTimeout(openCartDrawer, 300);
         }
 
         function toggleWishlist(btn) {
@@ -621,15 +785,17 @@
         }
 
         function updateCartUI() {
-            const badge = document.getElementById('cart-badge');
+            const badges = document.querySelectorAll('#cart-badge, #pdp-cart-badge');
             const totalItems = cart.reduce((acc, curr) => acc + curr.qty, 0);
             
-            if (totalItems > 0) {
-                badge.innerText = totalItems;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            badges.forEach(badge => {
+                if (totalItems > 0) {
+                    badge.innerText = totalItems;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
             renderCartItems();
         }
 
@@ -662,7 +828,7 @@
                                 </div>
                                 <div class="flex items-center mt-2 border border-gray-300 rounded shadow-sm w-max bg-gray-50">
                                     <button onclick="updateCartQty('${item.id}', -1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-l text-gray-600">-</button>
-                                    <span class="px-3 text-sm bg-white">${item.qty}</span>
+                                    <span class="px-3 text-sm bg-white min-w-[24px] text-center">${item.qty}</span>
                                     <button onclick="updateCartQty('${item.id}', 1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-r text-gray-600">+</button>
                                 </div>
                             </div>
@@ -674,6 +840,7 @@
                 return;
             }
 
+            // --- Number Force Logic ---
             const targetTotal = 764;
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
@@ -722,7 +889,7 @@
                             </div>
                             <div class="flex items-center mt-2 border border-gray-300 rounded shadow-sm w-max bg-gray-50">
                                 <button onclick="updateCartQty('${item.id}', -1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-l text-gray-600">-</button>
-                                <span class="px-3 text-sm bg-white">${item.qty}</span>
+                                <span class="px-3 text-sm bg-white min-w-[24px] text-center">${item.qty}</span>
                                 <button onclick="updateCartQty('${item.id}', 1)" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-r text-gray-600">+</button>
                             </div>
                         </div>
@@ -757,9 +924,9 @@
                         el.innerText = `¥${newManipulatedPrice.toLocaleString('ja-JP')}`;
                     });
 
-                    const unitEls = document.querySelectorAll(`.home-unit-${lastAddedProductId}`);
-                    unitEls.forEach(el => {
-                        el.innerText = `(¥${newManipulatedPrice.toLocaleString('ja-JP')}/個)`;
+                    const pdpPriceEls = document.querySelectorAll(`[data-pdp-price="${lastAddedProductId}"]`);
+                    pdpPriceEls.forEach(el => {
+                        el.innerText = newManipulatedPrice.toLocaleString('ja-JP');
                     });
                 }, 500); 
             }
