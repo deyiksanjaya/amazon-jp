@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="ja" class="bg-white">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- Mengunci warna status bar / safe area atas ke warna gelap Amazon -->
+    
+    <!-- MENGUNCI WARNA STATUS BAR ATAS AGAR TETAP GELAP -->
     <meta name="theme-color" content="#232f3e">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Amazon Japan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -33,10 +36,10 @@
     </script>
     
     <style>
-        /* Mencegah background orange/aneh terekspos saat scroll bounce di mobile */
+        /* Mengunci background agar pantulan Safari tetap putih */
         html, body {
-            overscroll-behavior-y: none;
-            background-color: #ffffff;
+            background-color: #ffffff !important;
+            overscroll-behavior-y: none; /* Mencegah rubber-banding ekstrim */
         }
         
         ::-webkit-scrollbar {
@@ -68,7 +71,7 @@
             will-change: transform;
         }
 
-        /* Mengembalikan styling safe-area yang sempat hilang */
+        /* Safe area paddings untuk notch & home indicator iOS */
         .pt-safe {
             padding-top: max(0.5rem, env(safe-area-inset-top));
         }
@@ -82,8 +85,8 @@
     <div class="w-full h-full max-w-md bg-white flex flex-col relative overflow-hidden">
         
         <!-- Header & Navigasi -->
-        <div class="flex-none z-20 shadow-sm relative w-full">
-            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col">
+        <div class="flex-none z-20 shadow-sm relative">
+            <div class="bg-amazon-dark px-3 pb-2 flex flex-col pt-safe">
                 
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
@@ -101,11 +104,13 @@
                     </div>
 
                     <div class="flex items-center space-x-4 pr-1">
+                        <!-- Disamakan ikonnya menjadi fa-regular -->
                         <button class="text-white hover:text-gray-300 flex items-center justify-center">
                             <i class="fa-regular fa-user text-xl"></i>
                         </button>
                         <button onclick="openCartDrawer()" class="text-white hover:text-gray-300 relative flex items-center justify-center pt-1">
                             <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                            <!-- Disamakan style font badge-nya -->
                             <span id="cart-badge" class="absolute -top-1 right-0 text-amazon-orange font-bold text-[10px] bg-amazon-dark px-1.5 rounded-full hidden">0</span>
                         </button>
                     </div>
@@ -125,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- Filter Bar -->
             <div class="bg-white border-b border-gray-200 px-2 py-2 flex space-x-2 overflow-x-auto no-scrollbar scroll-smooth">
                 <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
                     <i class="fa-solid fa-sliders mr-1.5"></i> フィルター
@@ -150,11 +154,12 @@
         </div>
 
         <!-- Area List Produk -->
-        <div class="flex-1 overflow-y-auto bg-white pb-safe" id="product-container" onscroll="handleInfiniteScroll(this)">
+        <!-- pb-32 ditambahkan agar list paling bawah tidak menabrak bar Safari dan warnanya putih -->
+        <div class="flex-1 overflow-y-auto bg-white pb-32 pb-safe" id="product-container" onscroll="handleInfiniteScroll(this)">
             <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                 <p class="text-sm text-gray-800 font-medium">すべてのカテゴリーから検索結果を表示しています</p>
             </div>
-            <div id="product-list-inner" class="divide-y divide-gray-200 border-t border-gray-200 pb-10"></div>
+            <div id="product-list-inner" class="divide-y divide-gray-200 border-t border-gray-200"></div>
         </div>
 
         <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center bg-white z-10 absolute inset-y-32 inset-x-0">
@@ -165,7 +170,7 @@
         <!-- Tampilan Produk Detail (PDP) -->
         <div id="pdp-view" class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 flex flex-col h-full">
             
-            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col flex-none z-20 shadow-sm relative w-full">
+            <div class="bg-amazon-dark px-3 pb-2 flex flex-col pt-safe sticky top-0 z-20 shadow-sm flex-none">
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
                         <button onclick="closePDP()" class="text-white p-1 hover:text-gray-300 transition flex items-center justify-center">
@@ -211,7 +216,7 @@
                  ontouchmove="pdpTouchMove(event)" 
                  ontouchend="pdpTouchEnd(event)">
                  
-                <div id="pdp-slide-container" class="w-full min-h-full transition-transform duration-300 ease-out flex flex-col justify-start pb-8">
+                <div id="pdp-slide-container" class="w-full min-h-full transition-transform duration-300 ease-out flex flex-col justify-start">
                     <!-- Dynamic PDP Content -->
                 </div>
             </div>
@@ -219,7 +224,7 @@
 
         <!-- Cart Drawer -->
         <div id="cart-drawer" class="fixed inset-0 bg-black/50 z-[70] flex justify-end flex-col opacity-0 pointer-events-none transition-opacity duration-300">
-            <div id="cart-drawer-content" class="bg-white rounded-t-2xl max-h-[85vh] h-[80vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl pb-safe">
+            <div id="cart-drawer-content" class="bg-white rounded-t-2xl max-h-[85vh] h-[80vh] flex flex-col transform translate-y-full transition-transform duration-300 shadow-2xl">
                 <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-cart-shopping text-amazon-dark text-lg"></i>
@@ -232,7 +237,7 @@
 
                 <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 space-y-4 divide-y divide-gray-100"></div>
 
-                <div class="p-4 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <div class="p-4 border-t border-gray-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-safe">
                     <div class="flex justify-between items-center text-sm mb-3">
                         <span class="text-gray-800">小計</span>
                         <span id="cart-subtotal" class="font-bold text-red-700 text-lg">¥0</span>
@@ -306,6 +311,7 @@
                     
                     if (!isNaN(parsedTarget) && parsedTarget > 0) {
                         window.isItemForceActive = true;
+                        
                         if (window.targetSwipeCount !== parsedTarget) {
                             window.targetSwipeCount = parsedTarget;
                             window.currentSwipeCount = 0;
@@ -382,6 +388,7 @@
         let lastAddedProductId = null;
         let priceChangeTimeout = null;
 
+        // --- Variabel State Magic PDP ---
         window.isNumberForceActive = false;
         window.isItemForceActive = false;
         window.isForcedItemInjected = false;
@@ -507,6 +514,7 @@
             }
         }
 
+        // --- LOGIKA MAGIS PDP SWIPE ---
         let currentPdpProduct = null;
         let currentPdpIndex = 0;
         let currentPdpImage = '';
@@ -520,13 +528,16 @@
             currentPdpProduct = pool[index];
             currentPdpImage = image;
             
+            // Reset state counter setiap kali PDP dibuka dari luar
             if (window.isItemForceActive) {
                 window.currentSwipeCount = 0;
-                window.mainSwipeDirection = 0; 
+                window.mainSwipeDirection = 0; // Reset pengunci arah insting
             }
 
             renderPDPContent(currentPdpProduct, currentPdpImage);
             document.getElementById('pdp-view').classList.remove('translate-x-full');
+            
+            // Lock body scroll saat PDP terbuka
             document.body.style.overflow = 'hidden';
         }
 
@@ -545,7 +556,7 @@
             const deliveryStr = `明日 ${today.getMonth() + 1}月${today.getDate()}日`;
 
             container.innerHTML = `
-                <div class="px-5 w-full max-w-md mx-auto pt-2 pb-16 relative flex flex-col justify-start">
+                <div class="px-5 w-full max-w-md mx-auto pt-2 pb-6 relative flex flex-col justify-start">
                     
                     <div class="flex items-center justify-between mt-2 mb-2">
                         <div class="text-amazon-link text-xs hover:underline cursor-pointer">${storeName}のストアを表示</div>
@@ -630,6 +641,9 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- BLOK PUTIH BESAR DI BAWAH: Untuk mencegah iOS Safari mewarnai navigation bar menjadi orange -->
+                <div class="h-40 bg-white w-full flex-none pb-safe"></div>
             `;
         }
 
@@ -651,6 +665,7 @@
         }
 
         function pdpTouchMove(e) { 
+            // Biarkan scroll vertikal bawaan browser berjalan
         }
 
         function pdpTouchEnd(e) {
@@ -662,11 +677,12 @@
             const dx = touchEndX - pdpTouchStartX;
             const dy = touchEndY - pdpTouchStartY;
             
+            // Evaluasi dominan swipe horizontal (dx lebih besar dari dy)
             if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 50) {
                 if (dx < 0) {
-                    navigatePDP(1); 
+                    navigatePDP(1); // Swipe ke Kiri -> Arah 1 (Next)
                 } else {
-                    navigatePDP(-1); 
+                    navigatePDP(-1); // Swipe ke Kanan -> Arah -1 (Prev)
                 }
             }
         }
@@ -679,19 +695,24 @@
             let nextIndex = (currentPdpIndex + direction + pool.length) % pool.length;
 
             if (window.isItemForceActive && !window.isForcedItemInjected && window.targetSwipeCount > 0) {
+                
+                // 1. Kunci Insting Arah Pertama
                 if (window.mainSwipeDirection === 0) {
                     window.mainSwipeDirection = direction;
                 }
 
+                // 2. Evaluasi Arah Swipe Saat Ini vs Arah Insting
                 if (direction === window.mainSwipeDirection) {
-                    window.currentSwipeCount++; 
+                    window.currentSwipeCount++; // Searah insting utama = Tambah
                 } else {
-                    window.currentSwipeCount--; 
+                    window.currentSwipeCount--; // Berlawanan arah insting = Kurangi
                 }
 
                 window.debugLog(`Swipe! Dir: ${direction}, Main: ${window.mainSwipeDirection}, Count: ${window.currentSwipeCount}/${window.targetSwipeCount}`);
 
+                // 3. Cek pencapaian Target
                 if (window.currentSwipeCount === window.targetSwipeCount) {
+                    // Siapkan Item Paksaan (Fujiya Milky Pie)
                     targetProduct = {
                         id: 'jp-forced',
                         title: '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ',
@@ -703,6 +724,7 @@
                     };
                     targetImage = 'IMG_3567.jpeg';
 
+                    // Sisipkan ke array
                     let insertIndex = direction > 0 ? currentPdpIndex + 1 : currentPdpIndex;
                     snackProducts.splice(insertIndex, 0, targetProduct);
                     
@@ -728,17 +750,20 @@
             const container = document.getElementById('pdp-slide-container');
             const scrollArea = document.getElementById('pdp-scroll-area');
             
+            // Animasi Keluar (Slide saja, tanpa opacity)
             container.style.transition = 'transform 0.2s ease-in';
             container.style.transform = direction > 0 ? 'translateX(-100%)' : 'translateX(100%)';
 
             setTimeout(() => {
+                // UPDATE DOM DIBELAKANG LAYAR
                 renderPDPContent(currentPdpProduct, currentPdpImage);
-                scrollArea.scrollTop = 0; 
+                scrollArea.scrollTop = 0; // Reset scroll setiap ganti barang
                 
                 container.style.transition = 'none';
                 container.style.transform = direction > 0 ? 'translateX(100%)' : 'translateX(-100%)';
-                void container.offsetWidth; 
+                void container.offsetWidth; // Paksa reflow DOM
                 
+                // Animasi Masuk
                 container.style.transition = 'transform 0.25s ease-out';
                 container.style.transform = 'translateX(0)';
                 
@@ -748,6 +773,7 @@
             }, 200);
         }
 
+        // --- CART ---
         function addToCartPDP(productId, image) {
             addToCart(productId, image);
         }
@@ -852,6 +878,7 @@
                 return;
             }
 
+            // --- Number Force Logic ---
             const targetTotal = 764;
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
