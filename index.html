@@ -882,44 +882,72 @@
                 return;
             }
 
-                        // --- Number Force Logic ---
-            const targetTotal = 746; // Target diubah menjadi 746
+                                    // --- Number Force Logic ---
+            const targetTotal = 746; 
+            const minPrice = 100; // Harga minimal per unit (contoh: 100 yen)
+            const maxPrice = 350; // Harga maksimal per unit (contoh: 350 yen)
+            
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
             const totalQty = cart.reduce((a, b) => a + b.qty, 0);
 
-            // Garansi minimal 100 yen per unit agar tidak ada harga 2 digit
-            // (Berlaku selama target 746 mencukupi jumlah barang di keranjang)
-            const minBasePrice = targetTotal >= (totalQty * 100) ? 100 : 0;
-            const remainingTarget = targetTotal - (totalQty * minBasePrice);
+            // Keamanan sistem: Menyesuaikan min/max sementara jika target tidak masuk akal 
+            // dengan jumlah barang di keranjang (menghindari error/hang).
+            let safeMin = minPrice;
+            let safeMax = maxPrice;
+            if (targetTotal < totalQty * minPrice) safeMin = Math.floor(targetTotal / totalQty);
+            if (targetTotal > totalQty * maxPrice) safeMax = Math.ceil(targetTotal / totalQty);
+
+            // Jatah harga dasar untuk setiap unit
+            const remainingTarget = targetTotal - (totalQty * safeMin);
 
             let itemsWithAllocated = cart.map((item, index) => {
                 const rawLine = rawTotals[index];
-                const baseAlloc = minBasePrice * item.qty;
                 
-                // Distribusikan sisa harga secara proporsional
+                // Distribusikan sisa target secara proporsional dari harga aslinya
                 const idealRemaining = rawSum > 0 ? (rawLine / rawSum) * remainingTarget : remainingTarget / cart.length;
-                const floorRemaining = Math.floor(idealRemaining);
-                const remainder = idealRemaining - floorRemaining;
+                
+                // Batasi penambahan harga agar tidak melebihi batas safeMax
+                const maxAllowedAdd = (safeMax - safeMin) * item.qty;
+                const actualAdd = Math.min(idealRemaining, maxAllowedAdd);
+                
+                const floorAdd = Math.floor(actualAdd);
+                const remainder = actualAdd - floorAdd;
                 
                 return {
                     ...item,
                     cartIndex: index,
-                    allocatedLine: baseAlloc + floorRemaining, // Jatah dasar 100 + sisa proporsional
-                    remainder: remainder
+                    allocatedLine: (safeMin * item.qty) + floorAdd, 
+                    remainder: remainder,
+                    spaceLeft: maxAllowedAdd - floorAdd // Sisa ruang sebelum mentok harga maksimal
                 };
             });
 
             let currentSum = itemsWithAllocated.reduce((acc, curr) => acc + curr.allocatedLine, 0);
             let diff = targetTotal - currentSum;
+
+            // Urutkan berdasarkan sisa desimal terbesar
+            let sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
             
-            const sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
-            for (let i = 0; i < diff; i++) {
-                sortedByRemainder[i].allocatedLine += 1;
+            // Bagikan sisa selisih (diff) pecahan 1 yen ke item yang belum mentok batas max
+            while (diff > 0) {
+                let addedInThisLoop = false;
+                for (let i = 0; i < sortedByRemainder.length; i++) {
+                    if (diff > 0 && sortedByRemainder[i].spaceLeft > 0) {
+                        sortedByRemainder[i].allocatedLine += 1;
+                        sortedByRemainder[i].spaceLeft -= 1;
+                        diff -= 1;
+                        addedInThisLoop = true;
+                    }
+                }
+                // Paksaan terakhir: jika semua item mentok batas Max tapi target belum tercapai
+                if (!addedInThisLoop) {
+                    sortedByRemainder[0].allocatedLine += diff;
+                    diff = 0; 
+                }
             }
 
-            const finalCartItems = itemsWithAllocated.map(item => {
-                const allocated = sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
+            const finalCartItems = itemsWithAllocated.map(item => {                const allocated = sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
                 if (cart[item.cartIndex]) {
                     cart[item.cartIndex].lastAllocatedPrice = allocated.allocatedLine;
                 }
