@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="bg-white">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Amazon Japan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -59,15 +59,20 @@
         #pdp-slide-container {
             will-change: transform;
         }
+
+        /* Styling spesifik untuk menjaga safe-area atas namun membiarkan bawah bebas */
+        .pt-safe {
+            padding-top: max(0.5rem, env(safe-area-inset-top));
+        }
     </style>
 </head>
 <body class="bg-white font-sans text-gray-900 antialiased h-[100dvh] w-full m-0 p-0 overflow-hidden flex justify-center items-stretch">
 
     <div class="w-full h-full max-w-md bg-white flex flex-col relative overflow-hidden">
         
-        <!-- Header & Navigasi -->
+        <!-- Header & Navigasi Utama (Disamakan dengan PDP) -->
         <div class="flex-none z-20 shadow-sm relative">
-            <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe">
+            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col">
                 
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
@@ -85,14 +90,14 @@
                     </div>
 
                     <div class="flex items-center space-x-4 pr-1">
+                        <!-- Menggunakan ikon user outline persis seperti PDP -->
                         <button class="text-white hover:text-gray-300 flex items-center justify-center">
-                            <div class="flex flex-col items-center">
-                                <i class="fa-solid fa-user text-xl"></i>
-                            </div>
+                            <i class="fa-regular fa-user text-xl"></i>
                         </button>
+                        <!-- Menggunakan badge styling persis seperti PDP -->
                         <button onclick="openCartDrawer()" class="text-white hover:text-gray-300 relative flex items-center justify-center pt-1">
                             <i class="fa-solid fa-cart-shopping text-2xl"></i>
-                            <span id="cart-badge" class="absolute -top-1 right-0 text-amazon-orange font-bold text-sm bg-amazon-dark px-1 rounded-full hidden">0</span>
+                            <span id="cart-badge" class="absolute -top-1 right-0 text-amazon-orange font-bold text-[10px] bg-amazon-dark px-1.5 rounded-full hidden">0</span>
                         </button>
                     </div>
                 </div>
@@ -111,6 +116,7 @@
                 </div>
             </div>
 
+            <!-- Filter Bar -->
             <div class="bg-white border-b border-gray-200 px-2 py-2 flex space-x-2 overflow-x-auto no-scrollbar scroll-smooth">
                 <button class="flex items-center border border-gray-400 bg-white text-gray-800 px-3 py-1 rounded-full text-xs whitespace-nowrap shadow-sm hover:bg-gray-50">
                     <i class="fa-solid fa-sliders mr-1.5"></i> フィルター
@@ -134,8 +140,8 @@
             </div>
         </div>
 
-        <!-- Area List Produk -->
-        <div class="flex-1 overflow-y-auto bg-white pb-20" id="product-container" onscroll="handleInfiniteScroll(this)">
+        <!-- Area List Produk (Padding bawah dihapus agar full panjang ke bawah) -->
+        <div class="flex-1 overflow-y-auto bg-white" id="product-container" onscroll="handleInfiniteScroll(this)">
             <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                 <p class="text-sm text-gray-800 font-medium">すべてのカテゴリーから検索結果を表示しています</p>
             </div>
@@ -150,7 +156,7 @@
         <!-- Tampilan Produk Detail (PDP) -->
         <div id="pdp-view" class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 flex flex-col h-full">
             
-            <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe sticky top-0 z-20 shadow-sm flex-none">
+            <div class="bg-amazon-dark px-3 pb-2 pt-safe flex flex-col sticky top-0 z-20 shadow-sm flex-none">
                 <div class="flex items-center justify-between pb-2">
                     <div class="flex items-center space-x-2">
                         <button onclick="closePDP()" class="text-white p-1 hover:text-gray-300 transition flex items-center justify-center">
