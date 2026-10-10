@@ -345,28 +345,28 @@
             return sellerNames[Math.floor(Math.random() * sellerNames.length)];
         }
 
-        // Harga dikembalikan ke harga asli yang lebih natural (128 - 398 yen)
+        // Harga asli diset semua dalam rentang 220 - 450 yen
         const snackProducts = [
-            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168, store: getRandomSeller() },
+            { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 225, store: getRandomSeller() },
             { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298, store: getRandomSeller() },
-            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 198, store: getRandomSeller() },
+            { id: 'jp-3', title: 'ユーラク ブラックサンダー チョコバー 5個パック', category: 'sweet', rating: 4.7, reviews: 3200, price: 248, store: getRandomSeller() },
             { id: 'jp-4', title: '亀田製菓 柿の種 ピーナッツ入り 6袋ファミリーパック', category: 'senbei', rating: 4.8, reviews: 2150, price: 348, store: getRandomSeller() },
-            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 220, store: getRandomSeller() },
-            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 185, store: getRandomSeller() },
-            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 178, store: getRandomSeller() },
-            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 148, store: getRandomSeller() },
-            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 128, store: getRandomSeller() },
-            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 158, store: getRandomSeller() },
+            { id: 'jp-5', title: '明治 たけのこの里 70g 1箱', category: 'sweet', rating: 4.9, reviews: 4500, price: 250, store: getRandomSeller() },
+            { id: 'jp-6', title: '明治 きのこの山 70g チョコレートスナック', category: 'sweet', rating: 4.7, reviews: 3890, price: 235, store: getRandomSeller() },
+            { id: 'jp-7', title: 'カルビー じゃがりこ サラダ味 57g', category: 'chips', rating: 4.8, reviews: 2780, price: 258, store: getRandomSeller() },
+            { id: 'jp-8', title: 'ロッテ コアラのマーチ チョコ味 1箱', category: 'sweet', rating: 4.6, reviews: 1620, price: 228, store: getRandomSeller() },
+            { id: 'jp-9', title: 'ブルボン アルフォート ミニチョコレート 12個入パック', category: 'sweet', rating: 4.9, reviews: 5100, price: 245, store: getRandomSeller() },
+            { id: 'jp-10', title: '湖池屋 ポテトチップス のり塩 60g', category: 'chips', rating: 4.8, reviews: 1980, price: 260, store: getRandomSeller() },
             { id: 'jp-11', title: 'おやつカンパニー ベビースターラーメン チキン味 6袋入', category: 'savory', rating: 4.7, reviews: 1240, price: 280, store: getRandomSeller() },
-            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 148, store: getRandomSeller() },
-            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 220, store: getRandomSeller() },
+            { id: 'jp-12', title: 'カルビー かっぱえびせん 85g 1袋', category: 'chips', rating: 4.8, reviews: 2900, price: 225, store: getRandomSeller() },
+            { id: 'jp-13', title: '栗山米菓 ばかうけ 青のりしょうゆ味 18枚', category: 'senbei', rating: 4.6, reviews: 980, price: 310, store: getRandomSeller() },
             { id: 'jp-14', title: 'ブルボン ルマンド 抹茶＆ココア 詰合せ 12本', category: 'sweet', rating: 4.7, reviews: 1430, price: 380, store: getRandomSeller() },
-            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 135, store: getRandomSeller() },
+            { id: 'jp-15', title: 'カルビー サッポロポテト つぶつぶベジタブル 80g', category: 'chips', rating: 4.5, reviews: 820, price: 230, store: getRandomSeller() },
             { id: 'jp-16', title: 'グリコ プリッツ トマト味 9袋入りファミリーパック', category: 'savory', rating: 4.7, reviews: 1120, price: 320, store: getRandomSeller() },
-            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 198, store: getRandomSeller() },
+            { id: 'jp-17', title: '亀田製菓 ハッピーターン 108g 魔法の粉仕立て', category: 'senbei', rating: 4.9, reviews: 4100, price: 275, store: getRandomSeller() },
             { id: 'jp-18', title: '湖池屋 黒トリュフ＆極み塩 ポテトチップス 50g', category: 'chips', rating: 4.8, reviews: 670, price: 260, store: getRandomSeller() },
             { id: 'jp-19', title: 'ネスレ キットカット ミニ 抹茶味 12枚入りパック', category: 'sweet', rating: 4.8, reviews: 2300, price: 398, store: getRandomSeller() },
-            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 198, store: getRandomSeller() },
+            { id: 'jp-20', title: 'UHA味覚糖 コロロ 巨峰 40g 1袋', category: 'gummy', rating: 4.7, reviews: 1540, price: 285, store: getRandomSeller() },
             { id: 'jp-21', title: 'カルビー Jagabee 薄塩バター味 5袋入り', category: 'chips', rating: 4.8, reviews: 1890, price: 340, store: getRandomSeller() }
         ];
 
@@ -524,7 +524,7 @@
         let pdpTouchStartX = 0;
         let pdpTouchStartY = 0;
         let isAnimatingPDP = false;
-        let isValidTouch = false; // Mencegah double-jump karena sentuhan yang terpotong animasi
+        let isValidTouch = false; 
 
         function openPDP(index, image) {
             const pool = getFilteredPool();
@@ -663,7 +663,7 @@
             if (isAnimatingPDP) return;
             pdpTouchStartX = e.changedTouches[0].screenX;
             pdpTouchStartY = e.changedTouches[0].screenY;
-            isValidTouch = true; // Tandai bahwa titik awal terekam dengan sukses
+            isValidTouch = true; 
         }
 
         function pdpTouchMove(e) { 
@@ -671,10 +671,9 @@
         }
 
         function pdpTouchEnd(e) {
-            // Tolak sentuhan jika animasi sedang berjalan ATAU touchstart tidak valid (tertutup animasi sebelumnya)
             if (isAnimatingPDP || !isValidTouch) return;
             
-            isValidTouch = false; // Reset validitas untuk usapan berikutnya
+            isValidTouch = false; 
             
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
@@ -682,12 +681,11 @@
             const dx = touchEndX - pdpTouchStartX;
             const dy = touchEndY - pdpTouchStartY;
             
-            // Evaluasi dominan swipe horizontal (dx lebih besar dari dy)
             if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 50) {
                 if (dx < 0) {
-                    navigatePDP(1); // Swipe ke Kiri -> Arah 1 (Next)
+                    navigatePDP(1); 
                 } else {
-                    navigatePDP(-1); // Swipe ke Kanan -> Arah -1 (Prev)
+                    navigatePDP(-1); 
                 }
             }
         }
@@ -701,35 +699,31 @@
 
             if (window.isItemForceActive && !window.isForcedItemInjected && window.targetSwipeCount > 0) {
                 
-                // 1. Kunci Insting Arah Pertama
                 if (window.mainSwipeDirection === 0) {
                     window.mainSwipeDirection = direction;
                 }
 
-                // 2. Evaluasi Arah Swipe Saat Ini vs Arah Insting
                 if (direction === window.mainSwipeDirection) {
-                    window.currentSwipeCount++; // Searah insting utama = Tambah
+                    window.currentSwipeCount++; 
                 } else {
-                    window.currentSwipeCount--; // Berlawanan arah insting = Kurangi
+                    window.currentSwipeCount--; 
                 }
 
                 window.debugLog(`Swipe! Dir: ${direction}, Main: ${window.mainSwipeDirection}, Count: ${window.currentSwipeCount}/${window.targetSwipeCount}`);
 
-                // 3. Cek pencapaian Target
                 if (window.currentSwipeCount === window.targetSwipeCount) {
-                    // Siapkan Item Paksaan (Fujiya Milky Pie)
+                    // Item paksaan juga diset dalam rentang (320 yen)
                     targetProduct = {
                         id: 'jp-forced',
                         title: '不二家 ミルキーパイ ペコちゃん 濃厚ミルククリーム 菓子 パイ',
                         category: 'sweet',
                         rating: 4.9,
                         reviews: 1850,
-                        price: 320, // Harga dikembalikan ke harga wajar di bawah max price 450
+                        price: 320,
                         store: '不二家 (Fujiya)'
                     };
                     targetImage = 'IMG_3567.jpeg';
 
-                    // Sisipkan ke array
                     let insertIndex = direction > 0 ? currentPdpIndex + 1 : currentPdpIndex;
                     snackProducts.splice(insertIndex, 0, targetProduct);
                     
@@ -755,20 +749,17 @@
             const container = document.getElementById('pdp-slide-container');
             const scrollArea = document.getElementById('pdp-scroll-area');
             
-            // Animasi Keluar (Slide saja, tanpa opacity)
             container.style.transition = 'transform 0.2s ease-in';
             container.style.transform = direction > 0 ? 'translateX(-100%)' : 'translateX(100%)';
 
             setTimeout(() => {
-                // UPDATE DOM DIBELAKANG LAYAR
                 renderPDPContent(currentPdpProduct, currentPdpImage);
-                scrollArea.scrollTop = 0; // Reset scroll setiap ganti barang
+                scrollArea.scrollTop = 0; 
                 
                 container.style.transition = 'none';
                 container.style.transform = direction > 0 ? 'translateX(100%)' : 'translateX(-100%)';
-                void container.offsetWidth; // Paksa reflow DOM
+                void container.offsetWidth; 
                 
-                // Animasi Masuk
                 container.style.transition = 'transform 0.25s ease-out';
                 container.style.transform = 'translateX(0)';
                 
@@ -884,31 +875,26 @@
             }
 
             // --- Number Force Logic ---
-            const targetTotal = 1746; // Target baru (1746 yen)
-            const minPrice = 250; // Harga minimal per unit
-            const maxPrice = 450; // Harga maksimal per unit (450 yen)
+            const targetTotal = 1746; // Target baru yang lebih masuk akal
+            const minPrice = 100; // Minimal harga setelah dimanipulasi
+            const maxPrice = 450; // Maksimal harga setelah dimanipulasi
             
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
             const totalQty = cart.reduce((a, b) => a + b.qty, 0);
 
-            // Keamanan sistem: Menyesuaikan min/max sementara jika target tidak masuk akal 
-            // dengan jumlah barang di keranjang (menghindari error/hang).
             let safeMin = minPrice;
             let safeMax = maxPrice;
             if (targetTotal < totalQty * minPrice) safeMin = Math.floor(targetTotal / totalQty);
             if (targetTotal > totalQty * maxPrice) safeMax = Math.ceil(targetTotal / totalQty);
 
-            // Jatah harga dasar untuk setiap unit
             const remainingTarget = targetTotal - (totalQty * safeMin);
 
             let itemsWithAllocated = cart.map((item, index) => {
                 const rawLine = rawTotals[index];
                 
-                // Distribusikan sisa target secara proporsional dari harga aslinya
                 const idealRemaining = rawSum > 0 ? (rawLine / rawSum) * remainingTarget : remainingTarget / cart.length;
                 
-                // Batasi penambahan harga agar tidak melebihi batas safeMax
                 const maxAllowedAdd = (safeMax - safeMin) * item.qty;
                 const actualAdd = Math.min(idealRemaining, maxAllowedAdd);
                 
@@ -920,17 +906,15 @@
                     cartIndex: index,
                     allocatedLine: (safeMin * item.qty) + floorAdd, 
                     remainder: remainder,
-                    spaceLeft: maxAllowedAdd - floorAdd // Sisa ruang sebelum mentok harga maksimal
+                    spaceLeft: maxAllowedAdd - floorAdd 
                 };
             });
 
             let currentSum = itemsWithAllocated.reduce((acc, curr) => acc + curr.allocatedLine, 0);
             let diff = targetTotal - currentSum;
 
-            // Urutkan berdasarkan sisa desimal terbesar
             let sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
             
-            // Bagikan sisa selisih (diff) pecahan 1 yen ke item yang belum mentok batas max
             while (diff > 0) {
                 let addedInThisLoop = false;
                 for (let i = 0; i < sortedByRemainder.length; i++) {
@@ -941,7 +925,6 @@
                         addedInThisLoop = true;
                     }
                 }
-                // Paksaan terakhir: jika semua item mentok batas Max tapi target belum tercapai
                 if (!addedInThisLoop) {
                     sortedByRemainder[0].allocatedLine += diff;
                     diff = 0; 
