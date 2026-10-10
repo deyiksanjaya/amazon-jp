@@ -78,7 +78,7 @@
 </head>
 <body class="bg-white font-sans text-gray-900 antialiased m-0 p-0 overflow-hidden">
 
-    <!-- Wrapper utama fixed inset-0 agar menempel sempurna di viewport -->
+    <!-- Wrapper utama fixed inset-0 agar menempel sempurna di viewport seperti PDP -->
     <div class="fixed inset-0 w-full max-w-md mx-auto bg-white flex flex-col overflow-hidden">
         
         <!-- Header & Navigasi -->
@@ -523,6 +523,7 @@
         let pdpTouchStartX = 0;
         let pdpTouchStartY = 0;
         let isAnimatingPDP = false;
+        let isValidTouch = false; // Mencegah double-jump karena sentuhan yang terpotong animasi
 
         function openPDP(index, image) {
             const pool = getFilteredPool();
@@ -661,6 +662,7 @@
             if (isAnimatingPDP) return;
             pdpTouchStartX = e.changedTouches[0].screenX;
             pdpTouchStartY = e.changedTouches[0].screenY;
+            isValidTouch = true; // Tandai bahwa titik awal terekam dengan sukses
         }
 
         function pdpTouchMove(e) { 
@@ -668,7 +670,10 @@
         }
 
         function pdpTouchEnd(e) {
-            if (isAnimatingPDP) return;
+            // Tolak sentuhan jika animasi sedang berjalan ATAU touchstart tidak valid (tertutup animasi sebelumnya)
+            if (isAnimatingPDP || !isValidTouch) return;
+            
+            isValidTouch = false; // Reset validitas untuk usapan berikutnya
             
             const touchEndX = e.changedTouches[0].screenX;
             const touchEndY = e.changedTouches[0].screenY;
