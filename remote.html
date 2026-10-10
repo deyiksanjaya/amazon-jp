@@ -1,1001 +1,494 @@
-
-
 <!DOCTYPE html>
-
 <html lang="id">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <meta name="theme-color" content="#0f172a">
-
 <title>Minimal Remote Control</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-
 <style>
-
 body {
-
     font-family: 'Inter', sans-serif;
-
     -webkit-tap-highlight-color: transparent;
-
 }
-
 button {
-
     touch-action: manipulation;
-
 }
-
 button:disabled {
-
     opacity: 0.5;
-
     cursor: not-allowed;
-
 }
-
+.key-btn {
+    padding: 0.875rem 0;
+    background: #0f172a;
+    color: white;
+    font-weight: 900;
+    font-size: 1.125rem;
+    border-radius: 1rem;
+    border: 1px solid #334155;
+    transition: all 0.15s ease;
+}
+.key-btn:hover {
+    background: #334155;
+}
+.key-btn:active {
+    transform: scale(0.95);
+}
 </style>
-
 </head>
-
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 md:p-8 select-none">
-
 <main class="flex-1 flex flex-col justify-between gap-4 w-full max-w-2xl mx-auto">
-
     <!-- HEADER -->
-
     <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-
         <div>
-
             <h1 class="text-base font-extrabold tracking-wider uppercase text-slate-200">
-
                 Remote Control
-
             </h1>
-
             <p class="text-xs text-slate-500 font-medium">
-
                 Realtime Firebase
-
             </p>
-
         </div>
-
         <div id="statusBadge"
-
              class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-
             <span id="statusText">CONNECTING...</span>
-
         </div>
-
     </div>
 
     <!-- MASTER SWITCH -->
-
     <button
-
         id="btn-master"
-
         type="button"
-
         onclick="toggleMaster()"
-
         disabled
-
         class="w-full py-4 px-6 rounded-2xl bg-slate-800 border-2 border-slate-700 text-white font-bold flex items-center justify-between shadow-lg hover:bg-slate-700 active:scale-[0.99] transition-all">
-
         <div class="text-left">
-
             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-
                 Master Switch
-
             </div>
-
             <div id="label-masterAction" class="text-base font-extrabold text-white">
-
                 Aktifkan Semua
-
             </div>
-
         </div>
-
         <span id="badge-master"
-
               class="text-xs font-black px-3 py-1.5 rounded-xl bg-slate-700 text-slate-300 tracking-wider">
-
             ALL INACTIVE
-
         </span>
-
     </button>
 
     <!-- MAIN CONTROLS -->
-
     <div class="flex flex-col gap-4 my-2">
-
         <!-- NUMBER FORCE -->
-
         <button
-
             id="btn-numberForce"
-
             type="button"
-
             onclick="toggleSwitch('numberForce')"
-
             disabled
-
             class="w-full p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex items-center justify-between text-left transition-all duration-200 active:scale-[0.99] shadow-lg hover:border-slate-600">
-
             <div>
-
                 <span class="text-xs font-black tracking-widest uppercase text-slate-400 block mb-1">
-
                     Control 01
-
                 </span>
-
                 <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-
                     NUMBER FORCE
-
                 </h2>
-
             </div>
-
             <div id="badge-numberForce"
-
                  class="px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all">
-
                 INACTIVE
-
             </div>
-
         </button>
 
         <!-- ITEM FORCE -->
-
         <div class="w-full p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex flex-col gap-4 shadow-lg">
-
             <div class="flex items-center justify-between w-full">
-
                 <div>
-
                     <span class="text-xs font-black tracking-widest uppercase text-slate-400 block mb-1">
-
                         Control 02
-
                     </span>
-
                     <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-
                         ITEM FORCE
-
                     </h2>
-
                 </div>
-
                 <div id="badge-itemForce"
-
                      class="px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all">
-
                     INACTIVE
-
                 </div>
-
             </div>
 
             <!-- DISPLAY -->
-
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-right flex items-center justify-between gap-3">
-
                 <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-
                     Nilai Input (Auto-Sync)
-
                 </div>
-
                 <div id="keypadScreen"
-
                      class="text-3xl font-black text-white tracking-wider min-h-[2.5rem] flex items-center justify-end break-all">
-
                     0
-
                 </div>
-
             </div>
 
             <!-- KEYPAD -->
-
             <div class="grid grid-cols-3 gap-2">
-
                 <button type="button" onclick="appendKey('1')" class="key-btn">1</button>
-
                 <button type="button" onclick="appendKey('2')" class="key-btn">2</button>
-
                 <button type="button" onclick="appendKey('3')" class="key-btn">3</button>
-
                 <button type="button" onclick="appendKey('4')" class="key-btn">4</button>
-
                 <button type="button" onclick="appendKey('5')" class="key-btn">5</button>
-
                 <button type="button" onclick="appendKey('6')" class="key-btn">6</button>
-
                 <button type="button" onclick="appendKey('7')" class="key-btn">7</button>
-
                 <button type="button" onclick="appendKey('8')" class="key-btn">8</button>
-
                 <button type="button" onclick="appendKey('9')" class="key-btn">9</button>
-
                 <button
-
                     type="button"
-
                     onclick="clearKeypad()"
-
                     class="py-3.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-black text-xs rounded-2xl border border-rose-500/20 active:scale-95 transition-all">
-
                     CLR
-
                 </button>
-
                 <button type="button" onclick="appendKey('0')" class="key-btn">0</button>
-
                 <button
-
                     type="button"
-
                     onclick="deleteKey()"
-
                     class="py-3.5 bg-slate-900 hover:bg-slate-700 text-white font-black text-sm rounded-2xl border border-slate-700 active:scale-95 transition-all">
-
                     ⌫
-
                 </button>
-
             </div>
-
         </div>
-
     </div>
 
     <!-- TOAST -->
-
     <div id="toastMessage"
-
          role="status"
-
          aria-live="polite"
-
          class="text-center text-xs font-bold tracking-wider text-slate-400 min-h-[1.5rem] py-1 transition-opacity duration-300 opacity-0 uppercase">
-
         Siap
-
     </div>
-
 </main>
 
-<style>
-
-.key-btn {
-
-    padding: 0.875rem 0;
-
-    background: #0f172a;
-
-    color: white;
-
-    font-weight: 900;
-
-    font-size: 1.125rem;
-
-    border-radius: 1rem;
-
-    border: 1px solid #334155;
-
-    transition: all 0.15s ease;
-
-}
-
-.key-btn:hover {
-
-    background: #334155;
-
-}
-
-.key-btn:active {
-
-    transform: scale(0.95);
-
-}
-
-</style>
-
 <script type="module">
-
-import {
-
-    initializeApp
-
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-
-import {
-
-    getDatabase,
-
-    ref,
-
-    onValue,
-
-    update
-
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-
-import {
-
-    getAuth,
-
-    signInAnonymously
-
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 /* =========================================
-
    FIREBASE CONFIGURATION
-
 ========================================= */
-
 const firebaseConfig = {
-
     apiKey: "AIzaSyDrzoRgLQQYf7l9yctMGOttEKYbZSH6-p8",
-
     authDomain: "e-comerce-force.firebaseapp.com",
-
     databaseURL: "https://e-comerce-force-default-rtdb.asia-southeast1.firebasedatabase.app",
-
     projectId: "e-comerce-force",
-
     storageBucket: "e-comerce-force.firebasestorage.app",
-
     messagingSenderId: "514683280786",
-
     appId: "1:514683280786:web:915dcf56b2056c7847354b"
-
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getDatabase(app);
-
 const auth = getAuth(app);
-
 const dbRef = ref(db, "forceConfig");
 
 /* =========================================
-
    APPLICATION STATE
-
 ========================================= */
-
 let currentState = {
-
     numberForce: "inactive",
-
     itemForce: ""
-
 };
 
 let tempInput = "";
-
 let authReady = false;
-
 let isInitialized = false;
-
 let pendingWrites = 0;
-
 let toastTimeout = null;
-
 let inputSyncTimeout = null;
-
 let writeQueue = Promise.resolve();
 
 /* =========================================
-
    UI HELPERS
-
 ========================================= */
-
 function showToast(message) {
-
     const el = document.getElementById("toastMessage");
-
     el.textContent = message;
-
     el.classList.remove("opacity-0");
-
     clearTimeout(toastTimeout);
-
     toastTimeout = setTimeout(() => {
-
         el.classList.add("opacity-0");
-
     }, 2200);
-
 }
 
 function setConnectionStatus(status, message) {
-
     const badge = document.getElementById("statusBadge");
-
     const text = document.getElementById("statusText");
-
     const styles = {
-
         connecting: "px-3 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20",
-
         connected: "px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-
         disconnected: "px-3 py-1 rounded-lg text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20"
-
     };
-
     badge.className = styles[status] || styles.connecting;
-
     text.textContent = message;
-
 }
 
 function setControlsEnabled(enabled) {
-
     document.getElementById("btn-master").disabled = !enabled;
-
     document.getElementById("btn-numberForce").disabled = !enabled;
-
     document.querySelectorAll(".key-btn, .grid button").forEach(button => {
-
         button.disabled = !enabled;
-
     });
-
-    // Tombol CLR dan delete juga harus mengikuti status autentikasi.
-
-    document.querySelectorAll("#btn-master, #btn-numberForce").forEach(button => {
-
-        button.disabled = !enabled;
-
-    });
-
 }
 
 function isNumberActive() {
-
-    return currentState.numberForce === "active" ||
-
-           currentState.numberForce === true;
-
+    return currentState.numberForce === "active" || currentState.numberForce === true;
 }
 
 function hasItemValue(value = currentState.itemForce) {
-
-    return value !== "" &&
-
-           value !== null &&
-
-           value !== undefined &&
-
-           value !== "inactive";
-
+    return value !== "" && value !== null && value !== undefined && value !== "inactive";
 }
 
 function displayInput(value) {
-
-    document.getElementById("keypadScreen").textContent =
-
-        value === "" ? "0" : value;
-
+    document.getElementById("keypadScreen").textContent = value === "" ? "0" : value;
 }
 
 /* =========================================
-
    SERIALIZED FIREBASE WRITES
-
-   Menjaga urutan update agar perubahan keypad
-
-   tidak saling mendahului.
-
 ========================================= */
-
 function writeUpdates(updates) {
-
     if (!authReady) {
-
         showToast("Autentikasi belum siap");
-
         return Promise.reject(new Error("Firebase authentication not ready"));
-
     }
-
     pendingWrites++;
-
     const operation = writeQueue.then(async () => {
-
         await update(dbRef, updates);
-
     });
-
-    // An error must not permanently break the queue.
-
     writeQueue = operation.catch(() => {});
-
     return operation
-
         .catch(error => {
-
             console.error("Firebase update failed:", error);
-
             showToast("Gagal menyimpan data");
-
             throw error;
-
         })
-
         .finally(() => {
-
             pendingWrites = Math.max(0, pendingWrites - 1);
-
         });
-
 }
 
 /* =========================================
-
    ITEM FORCE
-
 ========================================= */
-
 function scheduleInputSync() {
-
     clearTimeout(inputSyncTimeout);
-
     inputSyncTimeout = setTimeout(() => {
-
-        // Jangan timpa input lokal jika masih ada update
-
-        // yang belum selesai.
-
         if (pendingWrites === 0) {
-
             tempInput = String(currentState.itemForce ?? "");
-
             displayInput(tempInput);
-
         }
-
     }, 800);
-
 }
 
 async function updateItemForceToFirebase(value) {
-
     const normalizedValue = String(value);
-
     try {
-
-        await writeUpdates({
-
-            itemForce: normalizedValue
-
-        });
-
-    } catch (error) {
-
-        // Reconciliation will restore the database value.
-
-    }
-
+        await writeUpdates({ itemForce: normalizedValue });
+    } catch (error) {}
 }
 
 window.appendKey = function(digit) {
-
     if (!authReady) return;
-
     if (!/^\d$/.test(digit)) return;
-
     if (tempInput.length >= 6) {
-
         showToast("Maksimal 6 digit");
-
         return;
-
     }
-
     if (tempInput === "0") {
-
         tempInput = digit;
-
     } else {
-
         tempInput += digit;
-
     }
-
     displayInput(tempInput);
-
     updateItemForceToFirebase(tempInput);
-
     scheduleInputSync();
-
 };
 
 window.clearKeypad = function() {
-
     if (!authReady) return;
-
     tempInput = "";
-
     displayInput(tempInput);
-
     updateItemForceToFirebase("");
-
     scheduleInputSync();
-
 };
 
 window.deleteKey = function() {
-
     if (!authReady) return;
-
     tempInput = tempInput.slice(0, -1);
-
     displayInput(tempInput);
-
     updateItemForceToFirebase(tempInput);
-
     scheduleInputSync();
-
 };
 
 /* =========================================
-
    UI STATE
-
 ========================================= */
-
 function updateUI() {
-
     const active = isNumberActive();
-
     const btnNum = document.getElementById("btn-numberForce");
-
     const badgeNum = document.getElementById("badge-numberForce");
-
+    
     if (active) {
-
-        btnNum.className =
-
-            "w-full p-6 rounded-2xl bg-emerald-500 border-2 border-emerald-400 flex items-center justify-between text-left transition-all duration-200 active:scale-[0.99] shadow-xl shadow-emerald-950/35";
-
-        badgeNum.className =
-
-            "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-white text-emerald-700 shadow-sm transition-all";
-
+        btnNum.className = "w-full p-6 rounded-2xl bg-emerald-500 border-2 border-emerald-400 flex items-center justify-between text-left transition-all duration-200 active:scale-[0.99] shadow-xl shadow-emerald-950/35";
+        badgeNum.className = "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-white text-emerald-700 shadow-sm transition-all";
         badgeNum.textContent = "ACTIVE";
-
     } else {
-
-        btnNum.className =
-
-            "w-full p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex items-center justify-between text-left transition-all duration-200 active:scale-[0.99] shadow-lg hover:border-slate-600";
-
-        badgeNum.className =
-
-            "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all";
-
+        btnNum.className = "w-full p-6 rounded-2xl bg-slate-800/80 border-2 border-slate-700 flex items-center justify-between text-left transition-all duration-200 active:scale-[0.99] shadow-lg hover:border-slate-600";
+        badgeNum.className = "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all";
         badgeNum.textContent = "INACTIVE";
-
     }
 
     const itemBadge = document.getElementById("badge-itemForce");
-
     if (hasItemValue()) {
-
-        itemBadge.className =
-
-            "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-emerald-500 text-white shadow-sm transition-all";
-
+        itemBadge.className = "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-emerald-500 text-white shadow-sm transition-all";
         itemBadge.textContent = String(currentState.itemForce);
-
     } else {
-
-        itemBadge.className =
-
-            "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all";
-
+        itemBadge.className = "px-3.5 py-2 rounded-xl text-xs font-black tracking-wider bg-slate-700 text-slate-400 transition-all";
         itemBadge.textContent = "INACTIVE";
-
     }
 
     updateMasterUI();
-
 }
 
 function updateMasterUI() {
-
     const allActive = isNumberActive() && hasItemValue();
-
     const allInactive = !isNumberActive() && !hasItemValue();
-
     const badge = document.getElementById("badge-master");
-
     const label = document.getElementById("label-masterAction");
 
     if (allActive) {
-
         badge.textContent = "ALL ACTIVE";
-
-        badge.className =
-
-            "text-xs font-black px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white tracking-wider";
-
+        badge.className = "text-xs font-black px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white tracking-wider";
         label.textContent = "Matikan Semua";
-
     } else if (allInactive) {
-
         badge.textContent = "ALL INACTIVE";
-
-        badge.className =
-
-            "text-xs font-black px-3.5 py-1.5 rounded-xl bg-slate-700 text-slate-400 tracking-wider";
-
+        badge.className = "text-xs font-black px-3.5 py-1.5 rounded-xl bg-slate-700 text-slate-400 tracking-wider";
         label.textContent = "Aktifkan Semua";
-
     } else {
-
         badge.textContent = "PARSIAL";
-
-        badge.className =
-
-            "text-xs font-black px-3.5 py-1.5 rounded-xl bg-amber-500 text-slate-900 tracking-wider";
-
+        badge.className = "text-xs font-black px-3.5 py-1.5 rounded-xl bg-amber-500 text-slate-900 tracking-wider";
         label.textContent = "Aktifkan Semua";
-
     }
-
 }
 
 /* =========================================
-
    NUMBER FORCE TOGGLE
-
 ========================================= */
-
 window.toggleSwitch = async function(key) {
-
     if (!authReady) return;
-
     if (key !== "numberForce") return;
-
     const nextValue = isNumberActive() ? "inactive" : "active";
-
     try {
-
-        await writeUpdates({
-
-            [key]: nextValue
-
-        });
-
+        await writeUpdates({ [key]: nextValue });
         showToast(`Number Force -> ${nextValue.toUpperCase()}`);
-
-    } catch (error) {
-
-        // Error already handled by writeUpdates().
-
-    }
-
+    } catch (error) {}
 };
 
 /* =========================================
-
    MASTER SWITCH
-
-   Partial state always becomes fully active.
-
-   Empty or inactive itemForce receives "1".
-
 ========================================= */
-
 window.toggleMaster = async function() {
-
     if (!authReady) return;
-
     const allActive = isNumberActive() && hasItemValue();
-
-    let nextNum;
-
-    let nextItem;
+    let nextNum, nextItem;
 
     if (allActive) {
-
         nextNum = "inactive";
-
         nextItem = "";
-
     } else {
-
         nextNum = "active";
-
-        nextItem = hasItemValue()
-
-            ? String(currentState.itemForce)
-
-            : "1";
-
+        nextItem = hasItemValue() ? String(currentState.itemForce) : "1";
     }
 
-    // Update the local screen immediately when assigning default 1.
-
     if (!allActive && !hasItemValue()) {
-
         tempInput = "1";
-
         displayInput(tempInput);
-
     }
 
     try {
-
-        await writeUpdates({
-
-            numberForce: nextNum,
-
-            itemForce: nextItem
-
-        });
-
+        await writeUpdates({ numberForce: nextNum, itemForce: nextItem });
         showToast(allActive ? "Semua dimatikan" : "Semua diaktifkan");
-
-    } catch (error) {
-
-        // Error already handled by writeUpdates().
-
-    }
-
+    } catch (error) {}
 };
 
 /* =========================================
-
-   FIREBASE LISTENERS
-
+   PHYSICAL KEYBOARD LISTENER
 ========================================= */
+window.addEventListener('keydown', (e) => {
+    // Abaikan jika fokus sedang berada pada input lain (sebagai best-practice)
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
+    if (e.key >= '0' && e.key <= '9') {
+        window.appendKey(e.key);
+    } else if (e.key === 'Backspace') {
+        window.deleteKey();
+    } else if (e.key === 'Delete' || e.key === 'Escape') {
+        window.clearKeypad();
+    }
+});
+
+/* =========================================
+   FIREBASE LISTENERS
+========================================= */
 function startDatabaseListeners() {
-
     const connectedRef = ref(db, ".info/connected");
-
     onValue(connectedRef, snapshot => {
-
         if (snapshot.val() === true) {
-
             setConnectionStatus("connected", "TERHUBUNG");
-
         } else {
-
             setConnectionStatus("disconnected", "TERPUTUS");
-
         }
-
     }, error => {
-
         console.error("Connection listener failed:", error);
-
         setConnectionStatus("disconnected", "KONEKSI ERROR");
-
     });
 
     onValue(dbRef, snapshot => {
-
         const data = snapshot.val() || {};
-
         currentState.numberForce = data.numberForce ?? "inactive";
-
-        currentState.itemForce =
-
-            data.itemForce === undefined || data.itemForce === null
-
-                ? ""
-
-                : String(data.itemForce);
-
-        // Initial load, or remote synchronization when the keypad
-
-        // is not in the middle of a local update.
-
+        currentState.itemForce = data.itemForce === undefined || data.itemForce === null ? "" : String(data.itemForce);
+        
         if (!isInitialized) {
-
             tempInput = currentState.itemForce;
-
             displayInput(tempInput);
-
             isInitialized = true;
-
         } else if (pendingWrites === 0) {
-
-            // A short delay protects freshly typed digits from
-
-            // being overwritten by an older snapshot.
-
             scheduleInputSync();
-
         }
-
         updateUI();
-
     }, error => {
-
         console.error("Database listener failed:", error);
-
         showToast("Gagal membaca database");
-
     });
-
 }
 
 /* =========================================
-
    INITIALIZATION
-
 ========================================= */
-
 async function init() {
-
     setControlsEnabled(false);
-
     setConnectionStatus("connecting", "CONNECTING...");
-
     try {
-
         await signInAnonymously(auth);
-
         authReady = true;
-
         setControlsEnabled(true);
-
         startDatabaseListeners();
-
         showToast("Firebase siap");
-
     } catch (error) {
-
         console.error("Firebase authentication failed:", error);
-
         authReady = false;
-
         setControlsEnabled(false);
-
         setConnectionStatus("disconnected", "AUTH ERROR");
-
         showToast("Login Firebase gagal");
-
     }
-
 }
 
 init();
-
 </script>
-
 </body>
-
 </html>
