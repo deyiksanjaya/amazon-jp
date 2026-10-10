@@ -35,6 +35,12 @@ button:disabled {
 .key-btn:active {
     transform: scale(0.95);
 }
+/* Menghilangkan style bawaan input browser */
+input[type="tel"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
 </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col p-4 md:p-8 select-none">
@@ -116,15 +122,22 @@ button:disabled {
                 </div>
             </div>
 
-            <!-- DISPLAY -->
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-right flex items-center justify-between gap-3">
-                <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                    Nilai Input (Auto-Sync)
-                </div>
-                <div id="keypadScreen"
-                     class="text-3xl font-black text-white tracking-wider min-h-[2.5rem] flex items-center justify-end break-all">
-                    0
-                </div>
+            <!-- DISPLAY (Interactive Input) -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-3 relative cursor-text" onclick="document.getElementById('keypadScreen').focus()">
+                <label for="keypadScreen" class="text-xs text-slate-500 font-semibold uppercase tracking-wider whitespace-nowrap cursor-text">
+                    Nilai Input
+                </label>
+                <!-- Input field yg menggantikan <div> -->
+                <input 
+                    id="keypadScreen" 
+                    type="tel" 
+                    inputmode="numeric" 
+                    pattern="[0-9]*"
+                    class="bg-transparent text-3xl font-black text-white tracking-wider min-h-[2.5rem] w-full text-right outline-none focus:ring-0 placeholder-slate-800"
+                    placeholder="0"
+                    oninput="handleNativeInput(this.value)"
+                    disabled
+                >
             </div>
 
             <!-- KEYPAD -->
@@ -201,6 +214,7 @@ let isInitialized = false;
 let pendingWrites = 0;
 let toastTimeout = null;
 let inputSyncTimeout = null;
+let typeTimeout = null; // Timeout untuk debouncing native keyboard
 let writeQueue = Promise.resolve();
 
 /* =========================================
@@ -231,6 +245,7 @@ function setConnectionStatus(status, message) {
 function setControlsEnabled(enabled) {
     document.getElementById("btn-master").disabled = !enabled;
     document.getElementById("btn-numberForce").disabled = !enabled;
+    document.getElementById("keypadScreen").disabled = !enabled;
     document.querySelectorAll(".key-btn, .grid button").forEach(button => {
         button.disabled = !enabled;
     });
@@ -245,7 +260,9 @@ function hasItemValue(value = currentState.itemForce) {
 }
 
 function displayInput(value) {
-    document.getElementById("keypadScreen").textContent = value === "" ? "0" : value;
+    const inputEl = document.getElementById("keypadScreen");
+    // Karena menggunakan input, kita set .value alih-alih .textContent
+    inputEl.value = value === "" ? "" : value;
 }
 
 /* =========================================
@@ -273,7 +290,7 @@ function writeUpdates(updates) {
 }
 
 /* =========================================
-   ITEM FORCE
+   ITEM FORCE LOGIC (NATIVE INPUT & T9)
 ========================================= */
 function scheduleInputSync() {
     clearTimeout(inputSyncTimeout);
@@ -292,6 +309,30 @@ async function updateItemForceToFirebase(value) {
     } catch (error) {}
 }
 
+// Logika untuk mengetik dari Virtual Keyboard HP (Native)
+window.handleNativeInput = function(val) {
+    if (!authReady) return;
+    
+    // Hanya izinkan angka, filter semua karakter lain
+    let cleaned = val.replace(/\D/g, '');
+    
+    if (cleaned.length > 6) {
+        cleaned = cleaned.substring(0, 6);
+        showToast("Maksimal 6 digit");
+    }
+    
+    tempInput = cleaned;
+    document.getElementById('keypadScreen').value = tempInput;
+
+    // Delay pengiriman ke Firebase selama user masih ngetik (Debounce)
+    clearTimeout(typeTimeout);
+    typeTimeout = setTimeout(() => {
+        updateItemForceToFirebase(tempInput);
+        scheduleInputSync();
+    }, 500); // Tunda 500ms
+};
+
+// Logika tombol T9 di layar
 window.appendKey = function(digit) {
     if (!authReady) return;
     if (!/^\d$/.test(digit)) return;
@@ -299,12 +340,15 @@ window.appendKey = function(digit) {
         showToast("Maksimal 6 digit");
         return;
     }
+    
     if (tempInput === "0") {
         tempInput = digit;
     } else {
         tempInput += digit;
     }
+    
     displayInput(tempInput);
+    // Tombol on-screen dikirim langsung tanpa debounce
     updateItemForceToFirebase(tempInput);
     scheduleInputSync();
 };
@@ -417,22 +461,6 @@ window.toggleMaster = async function() {
 };
 
 /* =========================================
-   PHYSICAL KEYBOARD LISTENER
-========================================= */
-window.addEventListener('keydown', (e) => {
-    // Abaikan jika fokus sedang berada pada input lain (sebagai best-practice)
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    if (e.key >= '0' && e.key <= '9') {
-        window.appendKey(e.key);
-    } else if (e.key === 'Backspace') {
-        window.deleteKey();
-    } else if (e.key === 'Delete' || e.key === 'Escape') {
-        window.clearKeypad();
-    }
-});
-
-/* =========================================
    FIREBASE LISTENERS
 ========================================= */
 function startDatabaseListeners() {
@@ -453,11 +481,14 @@ function startDatabaseListeners() {
         currentState.numberForce = data.numberForce ?? "inactive";
         currentState.itemForce = data.itemForce === undefined || data.itemForce === null ? "" : String(data.itemForce);
         
+        // Mencegah nilai ter-replace saat input field sedang di-klik/fokus (user sedang mengetik)
+        const isTyping = document.activeElement === document.getElementById('keypadScreen');
+
         if (!isInitialized) {
             tempInput = currentState.itemForce;
             displayInput(tempInput);
             isInitialized = true;
-        } else if (pendingWrites === 0) {
+        } else if (pendingWrites === 0 && !isTyping) {
             scheduleInputSync();
         }
         updateUI();
