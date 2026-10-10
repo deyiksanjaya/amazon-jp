@@ -345,6 +345,7 @@
             return sellerNames[Math.floor(Math.random() * sellerNames.length)];
         }
 
+        // Harga dikembalikan ke harga asli yang lebih natural (128 - 398 yen)
         const snackProducts = [
             { id: 'jp-1', title: 'カルビー ポテトチップス うすしお味 60g × 1袋', category: 'chips', rating: 4.8, reviews: 1420, price: 168, store: getRandomSeller() },
             { id: 'jp-2', title: 'グリコ ポッキー 抹茶 贅沢仕立て 1箱', category: 'sweet', rating: 4.9, reviews: 890, price: 298, store: getRandomSeller() },
@@ -723,7 +724,7 @@
                         category: 'sweet',
                         rating: 4.9,
                         reviews: 1850,
-                        price: 320,
+                        price: 320, // Harga dikembalikan ke harga wajar di bawah max price 450
                         store: '不二家 (Fujiya)'
                     };
                     targetImage = 'IMG_3567.jpeg';
@@ -882,10 +883,10 @@
                 return;
             }
 
-                                    // --- Number Force Logic ---
-            const targetTotal = 746; 
-            const minPrice = 100; // Harga minimal per unit (contoh: 100 yen)
-            const maxPrice = 230; // Harga maksimal per unit (contoh: 350 yen)
+            // --- Number Force Logic ---
+            const targetTotal = 1746; // Target baru (1746 yen)
+            const minPrice = 250; // Harga minimal per unit
+            const maxPrice = 450; // Harga maksimal per unit (450 yen)
             
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
@@ -947,7 +948,8 @@
                 }
             }
 
-            const finalCartItems = itemsWithAllocated.map(item => {                const allocated = sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
+            const finalCartItems = itemsWithAllocated.map(item => {                
+                const allocated = sortedByRemainder.find(s => s.cartIndex === item.cartIndex);
                 if (cart[item.cartIndex]) {
                     cart[item.cartIndex].lastAllocatedPrice = allocated.allocatedLine;
                 }
