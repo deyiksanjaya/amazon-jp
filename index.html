@@ -882,27 +882,37 @@
                 return;
             }
 
-            // --- Number Force Logic ---
-            const targetTotal = 746;
+                        // --- Number Force Logic ---
+            const targetTotal = 746; // Target diubah menjadi 746
             const rawTotals = cart.map(item => item.price * item.qty);
             const rawSum = rawTotals.reduce((a, b) => a + b, 0);
+            const totalQty = cart.reduce((a, b) => a + b.qty, 0);
+
+            // Garansi minimal 100 yen per unit agar tidak ada harga 2 digit
+            // (Berlaku selama target 746 mencukupi jumlah barang di keranjang)
+            const minBasePrice = targetTotal >= (totalQty * 100) ? 100 : 0;
+            const remainingTarget = targetTotal - (totalQty * minBasePrice);
 
             let itemsWithAllocated = cart.map((item, index) => {
                 const rawLine = rawTotals[index];
-                const idealLine = rawSum > 0 ? (rawLine / rawSum) * targetTotal : targetTotal / cart.length;
-                const floorLine = Math.floor(idealLine);
-                const remainder = idealLine - floorLine;
+                const baseAlloc = minBasePrice * item.qty;
+                
+                // Distribusikan sisa harga secara proporsional
+                const idealRemaining = rawSum > 0 ? (rawLine / rawSum) * remainingTarget : remainingTarget / cart.length;
+                const floorRemaining = Math.floor(idealRemaining);
+                const remainder = idealRemaining - floorRemaining;
+                
                 return {
                     ...item,
                     cartIndex: index,
-                    allocatedLine: floorLine,
+                    allocatedLine: baseAlloc + floorRemaining, // Jatah dasar 100 + sisa proporsional
                     remainder: remainder
                 };
             });
 
             let currentSum = itemsWithAllocated.reduce((acc, curr) => acc + curr.allocatedLine, 0);
             let diff = targetTotal - currentSum;
-
+            
             const sortedByRemainder = [...itemsWithAllocated].sort((a, b) => b.remainder - a.remainder);
             for (let i = 0; i < diff; i++) {
                 sortedByRemainder[i].allocatedLine += 1;
