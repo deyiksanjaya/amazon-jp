@@ -56,14 +56,8 @@
             scrollbar-width: none;
         }
         
-        /* Mengunci gerakan vertikal di PDP secara absolut */
-        .pdp-locked {
-            touch-action: pan-x; /* Hanya izinkan swipe kiri-kanan */
-            overflow: hidden !important; 
-        }
-
         #pdp-slide-container {
-            will-change: transform, opacity;
+            will-change: transform;
         }
     </style>
 </head>
@@ -153,29 +147,56 @@
             <h3 class="font-semibold text-gray-800 text-base">商品が見つかりませんでした</h3>
         </div>
 
-        <!-- Tampilan Produk Detail (PDP) Terkunci Vertikal -->
+        <!-- Tampilan Produk Detail (PDP) -->
         <div id="pdp-view" class="fixed inset-0 bg-white z-[60] transform translate-x-full transition-transform duration-300 flex flex-col h-full">
-            <div class="flex items-center px-3 py-3 border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm flex-none">
-                <button onclick="closePDP()" class="p-2 text-gray-800 mr-2">
-                    <i class="fa-solid fa-chevron-left text-xl"></i>
-                </button>
-                <div class="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-300">
-                    <span class="text-sm text-gray-800 flex-1 truncate font-medium">amazon.co.jp</span>
-                    <i class="fa-solid fa-rotate-right text-gray-500 text-sm"></i>
+            
+            <div class="bg-amazon-dark px-3 py-2 flex flex-col pt-safe sticky top-0 z-20 shadow-sm flex-none">
+                <div class="flex items-center justify-between pb-2">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="closePDP()" class="text-white p-1 hover:text-gray-300 transition flex items-center justify-center">
+                            <i class="fa-solid fa-bars text-2xl"></i>
+                        </button>
+                        <div class="flex flex-col pt-1" onclick="closePDP()">
+                            <div class="text-white text-lg font-bold leading-none tracking-tighter flex items-center">
+                                amazon<span class="text-sm font-normal">.co.jp</span>
+                            </div>
+                            <div class="text-blue-300 text-[10px] font-bold italic leading-none flex items-center -mt-0.5">
+                                prime <i class="fa-solid fa-check text-[8px] ml-0.5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 pr-1">
+                        <button class="text-white hover:text-gray-300 flex items-center justify-center">
+                            <i class="fa-regular fa-user text-xl"></i>
+                        </button>
+                        <button onclick="openCartDrawer()" class="text-white hover:text-gray-300 relative flex items-center justify-center pt-1">
+                            <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                            <span id="pdp-cart-badge" class="absolute -top-1 right-0 text-amazon-orange font-bold text-[10px] bg-amazon-dark px-1.5 rounded-full hidden">0</span>
+                        </button>
+                    </div>
                 </div>
-                <button class="p-2 text-gray-800 ml-2 relative" onclick="openCartDrawer()">
-                    <i class="fa-solid fa-cart-shopping text-xl"></i>
-                    <span id="pdp-cart-badge" class="absolute top-1 right-0 text-amazon-orange font-bold text-[10px] bg-amazon-dark px-1.5 rounded-full hidden">0</span>
-                </button>
+
+                <div class="flex bg-white rounded overflow-hidden shadow-inner h-10 mt-1">
+                    <input 
+                        type="text" 
+                        value="snack" 
+                        readonly
+                        class="flex-1 bg-transparent border-none outline-none text-base text-gray-900 px-3 py-2 cursor-default focus:ring-0 focus:outline-none"
+                    >
+                    <button class="w-12 bg-amazon-orange flex items-center justify-center text-gray-800 hover:bg-yellow-500 transition">
+                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Area Swipe & Konten Terkunci -->
-            <div id="pdp-scroll-area" class="flex-1 bg-white relative pdp-locked w-full flex items-center justify-center overflow-hidden"
+            <!-- Area Swipe & Konten Bisa Di-scroll -->
+            <div id="pdp-scroll-area" class="flex-1 bg-white relative w-full flex flex-col overflow-y-auto overflow-x-hidden"
                  ontouchstart="pdpTouchStart(event)" 
                  ontouchmove="pdpTouchMove(event)" 
                  ontouchend="pdpTouchEnd(event)">
                  
-                <div id="pdp-slide-container" class="w-full h-full transition-transform duration-300 ease-out flex flex-col justify-start">
+                <div id="pdp-slide-container" class="w-full min-h-full transition-transform duration-300 ease-out flex flex-col justify-start pb-8">
                     <!-- Dynamic PDP Content -->
                 </div>
             </div>
@@ -518,7 +539,7 @@
 
             // Tidak ada dots carousel, layout dimiripkan main list
             container.innerHTML = `
-                <div class="px-5 w-full max-w-md mx-auto pt-2 pb-16 h-full overflow-y-hidden no-scrollbar relative flex flex-col justify-start">
+                <div class="px-5 w-full max-w-md mx-auto pt-2 pb-16 relative flex flex-col justify-start">
                     
                     <div class="flex items-center justify-between mt-2 mb-2">
                         <div class="text-amazon-link text-xs hover:underline cursor-pointer">${storeName}のストアを表示</div>
@@ -624,8 +645,7 @@
         }
 
         function pdpTouchMove(e) { 
-            // Blokir total fungsi scroll vertikal dari browser agar layar stabil
-            if (e.cancelable) e.preventDefault(); 
+            // Biarkan scroll vertikal bawaan browser berjalan
         }
 
         function pdpTouchEnd(e) {
@@ -637,8 +657,8 @@
             const dx = touchEndX - pdpTouchStartX;
             const dy = touchEndY - pdpTouchStartY;
             
-            // Evaluasi hanya jika dominan swipe horizontal
-            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+            // Evaluasi dominan swipe horizontal (dx lebih besar dari dy)
+            if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 50) {
                 if (dx < 0) {
                     navigatePDP(1); // Swipe ke Kiri -> Arah 1 (Next)
                 } else {
@@ -684,15 +704,13 @@
                     };
                     targetImage = 'IMG_3567.jpeg';
 
-                    // Sisipkan ke array (menyatu dengan list secara natural)
-                    // Sisipkan pada posisi yang akan diakses oleh 'nextIndex' selanjutnya
+                    // Sisipkan ke array
                     let insertIndex = direction > 0 ? currentPdpIndex + 1 : currentPdpIndex;
                     snackProducts.splice(insertIndex, 0, targetProduct);
                     
                     window.isForcedItemInjected = true;
                     window.debugLog(`🎯 Target Reached! Forced item injected at index ${insertIndex}`);
                     
-                    // Refresh referensi array
                     pool = getFilteredPool();
                     currentPdpIndex = pool.findIndex(p => p.id === 'jp-forced');
                 } else {
@@ -710,24 +728,24 @@
             currentPdpImage = targetImage;
 
             const container = document.getElementById('pdp-slide-container');
+            const scrollArea = document.getElementById('pdp-scroll-area');
             
-            // Animasi Keluar
-            container.style.transition = 'transform 0.2s ease-in, opacity 0.2s';
-            container.style.transform = direction > 0 ? 'translateX(-30px)' : 'translateX(30px)';
-            container.style.opacity = '0';
+            // Animasi Keluar (Slide saja, tanpa opacity)
+            container.style.transition = 'transform 0.2s ease-in';
+            container.style.transform = direction > 0 ? 'translateX(-100%)' : 'translateX(100%)';
 
             setTimeout(() => {
-                // UPDATE DOM DIBELAKANG LAYAR sebelum slide masuk
+                // UPDATE DOM DIBELAKANG LAYAR
                 renderPDPContent(currentPdpProduct, currentPdpImage);
+                scrollArea.scrollTop = 0; // Reset scroll setiap ganti barang
                 
                 container.style.transition = 'none';
-                container.style.transform = direction > 0 ? 'translateX(30px)' : 'translateX(-30px)';
-                void container.offsetWidth; // Paksa browser membaca DOM ulang (reflow)
+                container.style.transform = direction > 0 ? 'translateX(100%)' : 'translateX(-100%)';
+                void container.offsetWidth; // Paksa reflow DOM
                 
                 // Animasi Masuk
-                container.style.transition = 'transform 0.25s ease-out, opacity 0.25s';
+                container.style.transition = 'transform 0.25s ease-out';
                 container.style.transform = 'translateX(0)';
-                container.style.opacity = '1';
                 
                 setTimeout(() => {
                     isAnimatingPDP = false;
